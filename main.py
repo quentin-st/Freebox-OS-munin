@@ -16,7 +16,7 @@ from modes import *
 # Useful for development
 force_auth = False
 force_config = False
-force_mode = True
+force_mode = False
 forced_mode = mode_traffic
 
 app_id = 'freebox-revolution-munin'
@@ -27,12 +27,11 @@ device_name = socket.gethostname()
 
 # Munin config mode
 parser = argparse.ArgumentParser()
-parser.add_argument('config', nargs='?')
-parser.add_argument('authorize', nargs='?')
+parser.add_argument('arg', nargs='?')
 args = parser.parse_args()
 
 # Freebox authorization
-if args.authorize == 'authorize' or force_auth:
+if args.arg == 'authorize' or force_auth:
     api_authorize(app_id, app_name, app_version, device_name)
 
 # Mode, determined by symlink name
@@ -46,7 +45,7 @@ if mode not in modes:
     sys.exit(1)
 
 
-if args.config == 'config' or force_config:
+if args.arg == 'config' or force_config:
     if mode == 'freebox-traffic':
         print('graph_title Freebox traffic')
         print('graph_vlabel byte in (-) / out (+) per second')
