@@ -6,6 +6,7 @@ import sys
 import requests
 import socket
 import datetime
+import math
 
 from db import *
 from fields import *
@@ -107,8 +108,8 @@ date_start = now - datetime.timedelta(minutes=5)  # Remove 5 minutes from date_e
 params = {
     'db': db,
     'fields': fields,
-    'date_start': date_start,
-    'date_end': date_end
+    'date_start': math.ceil(date_start.timestamp()),
+    'date_end': math.ceil(date_end.timestamp())
 }
 
 # Build request
@@ -116,10 +117,11 @@ r = requests.get(uri, params=params, headers={
     'X-Fbx-App-Auth': freebox.session_token
 })
 r_json = r.json()
+data = r_json['result']['data']
 
 # Sum up data
 sums = {}
-for timed_data in r_json['result']['data']:
+for timed_data in data:
     for key, value in timed_data.items():
         if key not in fields:  # Ignore "time" and other unused values
             continue
@@ -129,10 +131,20 @@ for timed_data in r_json['result']['data']:
 
         if mode == mode_xdsl:
             value /= 10
-        elif mode == mode_temp:
-            value = round(value/100, 1)
 
         sums[key] += value
+
+# Get average from these sums
+for key, value in sums.items():
+    value /= len(data)
+
+    # Depending on field, either round or ceil value
+    if mode == mode_temp:
+        value = round(value, 2)
+    else:
+        value = round(value)
+
+    sums[key] = value
 
 for key, value in sums.items():
     print('{}.value {}'.format(key, value))
