@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import json
 import argparse
 import sys
 import requests
 import socket
+import datetime
 
 from db import *
 from fields import *
@@ -35,7 +35,7 @@ args = parser.parse_args()
 if args.freebox_auth == 'freebox_auth' or force_auth:
     api_authorize(app_id, app_name, app_version, device_name)
 
-# Mode: either '', ... determined by symlink name
+# Mode, determined by symlink name
 mode = __file__.split('/')[-1]
 if force_mode:
     mode = forced_mode
@@ -49,14 +49,14 @@ if mode not in modes:
 if args.config == 'config' or force_config:
     if mode == 'freebox-traffic':
         print('graph_title Freebox traffic')
-        print('graph_vlabel bits in (-) / out (+) per second')
-        print('rate_up.label Up traffic (B/s)')
+        print('graph_vlabel byte in (-) / out (+) per second')
+        print('rate_up.label Up traffic (byte/s)')
         print('rate_up.draw AREA')
-        print('bw_up.label Up bandwidth (B/s)')
+        print('bw_up.label Up bandwidth (byte/s)')
         print('bw_up.draw LINE')
-        print('rate_down.label Down traffic (B/s)')
+        print('rate_down.label Down traffic (byte/s)')
         print('rate_down.draw AREA')
-        print('bw_down.label Down bandwidth (B/s)')
+        print('bw_down.label Down bandwidth (byte/s)')
         print('bw_down.draw LINE')
     elif mode == 'freebox-temp':
         print('graph_title Freebox temperature')
@@ -69,16 +69,16 @@ if args.config == 'config' or force_config:
     elif mode == 'freebox-xdsl':
         print('graph_title xDSL')
         print('graph_vlabel xDSL noise margin (dB)')
-        print('up.label Up')
-        print('down.label Down')
+        print('snr_up.label Up')
+        print('snr_down.label Down')
     elif mode.startswith('freebox-switch'):
         switch_index = mode[:-1]
         print('graph_title Switch port #{} traffic'.format(switch_index))
-        print('graph_vlabel bits in (-) / out (+) per second')
-        print('up.label Up (B/s)')
-        print('up.draw AREA')
-        print('down.label Down (B/s)')
-        print('down.draw AREA')
+        print('graph_vlabel byte in (-) / out (+) per second')
+        print('tx_{}.label Up (byte/s)'.format(switch_index))
+        print('tx_{}.draw AREA'.format(switch_index))
+        print('rw_{}.label Down (byte/s)'.format(switch_index))
+        print('rw_{}.draw AREA'.format(switch_index))
 
     sys.exit(0)
 
@@ -92,15 +92,21 @@ if freebox is None:
 api_open_session(freebox, app_id)
 
 # Load graph info
-fields = get_fields(mode)
-
 uri = freebox.get_api_call_uri() + 'rrd/'
+fields = get_fields(mode)
 db = get_db(fields[0])
+
+# Compute date_start & date_end
+now = datetime.datetime.now()  # math.ceil(time.time())
+now = now.replace(second=0, microsecond=0)
+date_end = now.replace(minute=now.minute - now.minute % 5)  # Round to lowest 5 minutes
+date_start = now - datetime.timedelta(minutes=5)  # Remove 5 minutes from date_end
 
 params = {
     'db': db,
     'fields': fields,
-    'date_start': 0,  # TODO
+    'date_start': date_start,
+    'date_end': date_end
 }
 
 if db == db_temp:
@@ -110,5 +116,19 @@ if db == db_temp:
 r = requests.get(uri, params=params, headers={
     'X-Fbx-App-Auth': freebox.session_token
 })
+r_json = r.json()
 
-print(r.json())
+# Sum up data
+sums = {}
+for timed_data in r_json['result']['data']:
+    for key, value in timed_data.items():
+        if key == 'time':
+            continue
+
+        if key not in sums.keys():
+            sums[key] = 0
+
+        sums[key] += value
+
+for key, value in sums.items():
+    print('{}.value {}'.format(key, value))

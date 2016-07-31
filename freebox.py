@@ -124,8 +124,6 @@ def api_open_session(freebox, app_id):
         print('Could not open session: {}'.format(r_json['msg']))
         sys.exit(1)
 
-    print(r_json)
-
     session_token = r_json['result']['session_token']
     freebox.session_token = session_token
 
