@@ -6,6 +6,7 @@ import sys
 import requests
 import socket
 import datetime
+import time
 import math
 
 from db import *
@@ -104,12 +105,14 @@ now = datetime.datetime.now()  # math.ceil(time.time())
 now = now.replace(second=0, microsecond=0)
 date_end = now.replace(minute=now.minute - now.minute % 5)  # Round to lowest 5 minutes
 date_start = now - datetime.timedelta(minutes=5)  # Remove 5 minutes from date_end
+date_end_timestamp = math.ceil(time.mktime(date_end.timetuple()))
+date_start_timestamp = math.ceil(time.mktime(date_start.timetuple()))
 
 params = {
     'db': db,
     'fields': fields,
-    'date_start': math.ceil(date_start.timestamp()),
-    'date_end': math.ceil(date_end.timestamp())
+    'date_start': date_start_timestamp,
+    'date_end': date_end_timestamp
 }
 
 # Build request
