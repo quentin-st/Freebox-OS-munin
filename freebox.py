@@ -69,7 +69,7 @@ def api_authorize(app_id, app_name, app_version, device_name):
         status = r2_json['result']['status']
 
         if status == 'pending':
-            print('.', end="", flush=True)
+            print('.', end="")
         elif status == 'timeout':
             print('\nAuthorization request timeouted. Re-run this script, but please go faster next time')
             sys.exit(1)
