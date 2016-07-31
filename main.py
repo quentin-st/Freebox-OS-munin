@@ -12,6 +12,8 @@ from fields import *
 from freebox import api_authorize, api_open_session, get_freebox
 from modes import *
 
+# Configuration
+config_category = 'freebox'  # 'network' would be a great alternative
 
 # Useful for development
 force_auth = False
@@ -46,6 +48,8 @@ if mode not in modes:
 
 
 if args.arg == 'config' or force_config:
+    print('graph_category {}'.format(config_category))
+
     if mode == 'freebox-traffic':
         print('graph_title Freebox traffic')
         print('graph_vlabel byte in (-) / out (+) per second')
@@ -60,7 +64,6 @@ if args.arg == 'config' or force_config:
     elif mode == 'freebox-temp':
         print('graph_title Freebox temperature')
         print('graph_vlabel temperature in °C')
-        print('graph_category network')
         print('cpum.label CPUM')
         print('cpub.label CPUB')
         print('sw.label SW')
