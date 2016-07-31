@@ -28,11 +28,11 @@ device_name = socket.gethostname()
 # Munin config mode
 parser = argparse.ArgumentParser()
 parser.add_argument('config', nargs='?')
-parser.add_argument('freebox_auth', nargs='?')
+parser.add_argument('authorize', nargs='?')
 args = parser.parse_args()
 
 # Freebox authorization
-if args.freebox_auth == 'freebox_auth' or force_auth:
+if args.authorize == 'authorize' or force_auth:
     api_authorize(app_id, app_name, app_version, device_name)
 
 # Mode, determined by symlink name
