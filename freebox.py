@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import os
 import json
 import sys
 import requests
 
-freebox_config_file = 'freebox.json'
+freebox_config_file = os.path.join(os.path.dirname(__file__), 'freebox.json')
 
 
 class Freebox:
@@ -69,7 +70,8 @@ def api_authorize(app_id, app_name, app_version, device_name):
         status = r2_json['result']['status']
 
         if status == 'pending':
-            print('.', end="")
+            sys.stdout.write('.')
+            sys.stdout.flush()
         elif status == 'timeout':
             print('\nAuthorization request timeouted. Re-run this script, but please go faster next time')
             sys.exit(1)
