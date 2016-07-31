@@ -111,9 +111,6 @@ params = {
     'date_end': date_end
 }
 
-if db == db_temp:
-    params['precision'] = '10'
-
 # Build request
 r = requests.get(uri, params=params, headers={
     'X-Fbx-App-Auth': freebox.session_token
@@ -129,6 +126,11 @@ for timed_data in r_json['result']['data']:
 
         if key not in sums.keys():
             sums[key] = 0
+
+        if mode == mode_xdsl:
+            value /= 10
+        elif mode == mode_temp:
+            value = round(value/100, 1)
 
         sums[key] += value
 
