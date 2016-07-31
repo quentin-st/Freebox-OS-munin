@@ -74,7 +74,7 @@ if args.arg == 'config' or force_config:
         print('snr_up.label Up')
         print('snr_down.label Down')
     elif mode.startswith('freebox-switch'):
-        switch_index = mode[:-1]
+        switch_index = mode[-1]
         print('graph_title Switch port #{} traffic'.format(switch_index))
         print('graph_vlabel byte in (-) / out (+) per second')
         print('tx_{}.label Up (byte/s)'.format(switch_index))
