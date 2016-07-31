@@ -9,15 +9,15 @@ import socket
 
 from db import *
 from fields import *
-from freebox import Freebox, get_freebox
+from freebox import api_authorize, api_open_session, get_freebox
 from modes import *
 
 
 # Useful for development
-force_config = True
+force_auth = False
+force_config = False
 force_mode = True
 forced_mode = mode_traffic
-force_auth = True
 
 app_id = 'freebox-revolution-munin'
 app_name = 'Freebox-Revolution-munin'
@@ -33,56 +33,7 @@ args = parser.parse_args()
 
 # Freebox authorization
 if args.freebox_auth == 'freebox_auth' or force_auth:
-    print('Authenticating...')
-    uri = Freebox.get_api_call_uri() + 'login/authorize/'
-    r = requests.post(uri, json={
-        'app_id': app_id,
-        'app_name': app_name,
-        'app_version': app_version,
-        'device_name': device_name
-    })
-
-    r_json = r.json()
-
-    if not r_json['success']:
-        print('Error while authenticating: {}'.format(r_json))
-        sys.exit(1)
-
-    app_token = r_json['result']['app_token']
-    track_id = r_json['result']['track_id']
-
-    # Watch for token status
-    print('Waiting for you to push the "Yes" button on your Freebox')
-    check = True
-    success = False
-    challenge = None
-    while check:
-        r2 = requests.get(uri + str(track_id))
-        r2_json = r2.json()
-        status = r2_json['result']['status']
-
-        if status == 'pending':
-            print('.', end="", flush=True)
-        elif status == 'timeout':
-            print('\nAuthorization request timeouted. Re-run this script, but please go faster next time')
-            sys.exit(1)
-        elif status == 'denied':
-            print('\nYou denied authorization request.')
-            sys.exit(1)
-        elif status == 'granted':
-            check = False
-            success = True
-            challenge = r2_json['result']['challenge']
-
-    freebox = Freebox()
-    freebox.app_token = app_token
-    freebox.session_challenge = challenge
-    freebox.save()
-
-    # That's a success
-    print('\nSuccessfully authenticated script. Exiting.')
-
-    sys.exit(0)
+    api_authorize(app_id, app_name, app_version, device_name)
 
 # Mode: either '', ... determined by symlink name
 mode = __file__.split('/')[-1]
@@ -138,9 +89,7 @@ if freebox is None:
     print('Could not load Freebox from saved state.')
     sys.exit(1)
 
-# TODO open session
-# TODO get challenge
-# TODO begin session
+api_open_session(freebox, app_id)
 
 # Load graph info
 fields = get_fields(mode)
@@ -162,4 +111,4 @@ r = requests.get(uri, params=params, headers={
     'X-Fbx-App-Auth': freebox.session_token
 })
 
-print(r)
+print(r.json())
