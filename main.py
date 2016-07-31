@@ -122,7 +122,7 @@ r_json = r.json()
 sums = {}
 for timed_data in r_json['result']['data']:
     for key, value in timed_data.items():
-        if key == 'time':
+        if key not in fields:  # Ignore "time" and other unused values
             continue
 
         if key not in sums.keys():
