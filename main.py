@@ -89,12 +89,12 @@ if args.arg == 'config' or force_config:
         switch_index = mode[-1]
         print('graph_title Switch port #{} traffic'.format(switch_index))
         print('graph_vlabel byte in (-) / out (+) per second')
-        print('tx_{}.label Up (byte/s)'.format(switch_index))
-        print('tx_{}.draw AREA'.format(switch_index))
-        print('tx_{}.colour F44336'.format(switch_index))
-        print('rx_{}.label Down (byte/s)'.format(switch_index))
+        print('rx_{}.label Up (byte/s)'.format(switch_index))
         print('rx_{}.draw AREA'.format(switch_index))
-        print('rx_{}.colour 8BC34A'.format(switch_index))
+        print('rx_{}.colour F44336'.format(switch_index))
+        print('tx_{}.label Down (byte/s)'.format(switch_index))
+        print('tx_{}.draw AREA'.format(switch_index))
+        print('tx_{}.colour 8BC34A'.format(switch_index))
 
     sys.exit(0)
 
@@ -148,7 +148,7 @@ for timed_data in data:
             value /= 10
 
         # When combining upload+download on the same graph, download should be negative
-        if key in [field_rate_down, field_bw_down, field_rx1, field_rx2, field_rx3, field_rx4]:
+        if key in [field_rate_down, field_bw_down, field_tx1, field_tx2, field_tx3, field_tx4]:
             value *= -1
 
         sums[key] += value
