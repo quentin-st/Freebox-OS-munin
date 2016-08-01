@@ -92,9 +92,9 @@ if args.arg == 'config' or force_config:
         print('tx_{}.label Up (byte/s)'.format(switch_index))
         print('tx_{}.draw AREA'.format(switch_index))
         print('tx_{}.colour F44336'.format(switch_index))
-        print('rw_{}.label Down (byte/s)'.format(switch_index))
-        print('rw_{}.draw AREA'.format(switch_index))
-        print('rw_{}.colour 8BC34A'.format(switch_index))
+        print('rx_{}.label Down (byte/s)'.format(switch_index))
+        print('rx_{}.draw AREA'.format(switch_index))
+        print('rx_{}.colour 8BC34A'.format(switch_index))
 
     sys.exit(0)
 
