@@ -135,6 +135,10 @@ for timed_data in data:
         if mode == mode_xdsl:
             value /= 10
 
+        # When combining upload+download on the same graph, download should be negative
+        if key in [field_rate_down, field_bw_down, field_rx1, field_rx2, field_rx3, field_rx4]:
+            value *= -1
+
         sums[key] += value
 
 # Get average from these sums
