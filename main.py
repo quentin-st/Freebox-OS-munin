@@ -69,7 +69,7 @@ if args.arg == 'config' or force_config:
         print('bw_down.colour 407DB5')
     elif mode == 'freebox-temp':
         print('graph_title Freebox temperature')
-        print('graph_vlabel temperature in °C')
+        print('graph_vlabel temperature in C')
         print('cpum.label CPUM')
         print('cpum.colour EDC240')
         print('cpub.label CPUB')
