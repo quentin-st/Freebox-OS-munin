@@ -160,6 +160,8 @@ for key, value in sums.items():
     # Depending on field, either round or ceil value
     if mode == mode_temp:
         value = round(value, 2)
+    elif mode == mode_xdsl:
+        value = round(value, 1)
     else:
         value = round(value)
 
