@@ -128,6 +128,7 @@ def api_open_session(freebox, app_id):
 
     session_token = r_json['result']['session_token']
     freebox.session_token = session_token
+    freebox.save()
 
 
 def get_freebox():

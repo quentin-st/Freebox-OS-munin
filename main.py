@@ -99,73 +99,90 @@ if args.arg == 'config' or force_config:
     sys.exit(0)
 
 
+def query_data():
+    # Load graph info
+    uri = freebox.get_api_call_uri() + 'rrd/'
+    fields = get_fields(mode)
+    db = get_db(fields[0])
+
+    # Compute date_start & date_end
+    now = datetime.datetime.now()  # math.ceil(time.time())
+    now = now.replace(second=0, microsecond=0)
+    date_end = now.replace(minute=now.minute - now.minute % 5)  # Round to lowest 5 minutes
+    date_start = now - datetime.timedelta(minutes=5)  # Remove 5 minutes from date_end
+    date_end_timestamp = math.ceil(time.mktime(date_end.timetuple()))
+    date_start_timestamp = math.ceil(time.mktime(date_start.timetuple()))
+
+    params = {
+        'db': db,
+        'fields': fields,
+        'date_start': date_start_timestamp,
+        'date_end': date_end_timestamp
+    }
+
+    # Build request
+    r = requests.get(uri, params=params, headers={
+        'X-Fbx-App-Auth': freebox.session_token
+    })
+    r_json = r.json()
+
+    if not r_json['success']:
+        if r_json['error_code'] == 'auth_required':
+            # Open session and try again
+            api_open_session(freebox, app_id)
+            query_data()
+            return
+        else:
+            # Unknown error (http://dev.freebox.fr/sdk/os/login/#authentication-errors)
+            print('Unknown API error "{}": {}'.format(
+                r_json['error_code'],
+                r_json['msg']
+            ))
+            sys.exit(1)
+
+    data = r_json['result']['data']
+
+    # Sum up data
+    sums = {}
+    for timed_data in data:
+        for key, value in timed_data.items():
+            if key not in fields:  # Ignore "time" and other unused values
+                continue
+
+            if key not in sums.keys():
+                sums[key] = 0
+
+            if mode == mode_xdsl:
+                value /= 10
+
+            # When combining upload+download on the same graph, download should be negative
+            if key in [field_rate_down, field_bw_down, field_tx1, field_tx2, field_tx3, field_tx4]:
+                value *= -1
+
+            sums[key] += value
+
+    # Get average from these sums
+    for key, value in sums.items():
+        value /= len(data)
+
+        # Depending on field, either round or ceil value
+        if mode == mode_temp:
+            value = round(value, 2)
+        elif mode == mode_xdsl:
+            value = round(value, 1)
+        else:
+            value = round(value)
+
+        sums[key] = value
+
+    for key, value in sums.items():
+        print('{}.value {}'.format(key, value))
+
+
 # Query data
 freebox = get_freebox()
 if freebox is None:
     print('Could not load Freebox from saved state.')
     sys.exit(1)
 
-api_open_session(freebox, app_id)
-
-# Load graph info
-uri = freebox.get_api_call_uri() + 'rrd/'
-fields = get_fields(mode)
-db = get_db(fields[0])
-
-# Compute date_start & date_end
-now = datetime.datetime.now()  # math.ceil(time.time())
-now = now.replace(second=0, microsecond=0)
-date_end = now.replace(minute=now.minute - now.minute % 5)  # Round to lowest 5 minutes
-date_start = now - datetime.timedelta(minutes=5)  # Remove 5 minutes from date_end
-date_end_timestamp = math.ceil(time.mktime(date_end.timetuple()))
-date_start_timestamp = math.ceil(time.mktime(date_start.timetuple()))
-
-params = {
-    'db': db,
-    'fields': fields,
-    'date_start': date_start_timestamp,
-    'date_end': date_end_timestamp
-}
-
-# Build request
-r = requests.get(uri, params=params, headers={
-    'X-Fbx-App-Auth': freebox.session_token
-})
-r_json = r.json()
-data = r_json['result']['data']
-
-# Sum up data
-sums = {}
-for timed_data in data:
-    for key, value in timed_data.items():
-        if key not in fields:  # Ignore "time" and other unused values
-            continue
-
-        if key not in sums.keys():
-            sums[key] = 0
-
-        if mode == mode_xdsl:
-            value /= 10
-
-        # When combining upload+download on the same graph, download should be negative
-        if key in [field_rate_down, field_bw_down, field_tx1, field_tx2, field_tx3, field_tx4]:
-            value *= -1
-
-        sums[key] += value
-
-# Get average from these sums
-for key, value in sums.items():
-    value /= len(data)
-
-    # Depending on field, either round or ceil value
-    if mode == mode_temp:
-        value = round(value, 2)
-    elif mode == mode_xdsl:
-        value = round(value, 1)
-    else:
-        value = round(value)
-
-    sums[key] = value
-
-for key, value in sums.items():
-    print('{}.value {}'.format(key, value))
+query_data()
