@@ -98,6 +98,8 @@ if args.arg == 'config' or force_config:
     elif mode == 'freebox-df':
         print('graph_title Disk usage in percent')
         print('graph_vlabel %')
+        print('internal.min 0')
+        print('internal.max 100')
         print('internal.label internal')
         print('internal.draw LINE')
 
