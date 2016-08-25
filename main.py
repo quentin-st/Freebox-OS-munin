@@ -105,6 +105,7 @@ if args.arg == 'config' or force_config:
         print('tx_{}.colour 8BC34A'.format(switch_index))
     elif mode == 'freebox-df':
         print('graph_title Disk usage in percent')
+        print('graph_args --lower-limit 0 --upper-limit 100')
         print('graph_vlabel %')
         print('internal.min 0')
         print('internal.max 100')
