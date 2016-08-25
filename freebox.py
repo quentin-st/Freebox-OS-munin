@@ -43,7 +43,7 @@ class Freebox:
 
 def api_authorize(app_id, app_name, app_version, device_name):
     print('Authorizing...')
-    uri = Freebox.get_api_call_uri() + 'login/authorize/'
+    uri = Freebox.get_api_call_uri('login/authorize/')
     r = requests.post(uri, json={
         'app_id': app_id,
         'app_name': app_name,
@@ -102,7 +102,7 @@ def encode_app_token(app_token, challenge):
 
 def api_open_session(freebox, app_id):
     # Retrieve challenge
-    uri = Freebox.get_api_call_uri() + 'login/'
+    uri = Freebox.get_api_call_uri('login/')
     r = requests.get(uri)
     r_json = r.json()
 
