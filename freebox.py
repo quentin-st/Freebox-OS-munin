@@ -25,8 +25,8 @@ class Freebox:
         self.device_type = device_type
 
     @staticmethod
-    def get_api_call_uri():
-        return 'http://mafreebox.freebox.fr/api/v3/'
+    def get_api_call_uri(endpoint):
+        return 'http://mafreebox.freebox.fr/api/v3/' + endpoint
 
     def save(self):
         with open(freebox_config_file, 'w') as output:

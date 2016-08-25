@@ -6,6 +6,7 @@ mode_switch1 = 'freebox-switch1'
 mode_switch2 = 'freebox-switch2'
 mode_switch3 = 'freebox-switch3'
 mode_switch4 = 'freebox-switch4'
+mode_df = 'freebox-df'
 
 modes = [
     mode_traffic,
@@ -14,5 +15,6 @@ modes = [
     mode_switch1,
     mode_switch2,
     mode_switch3,
-    mode_switch4
+    mode_switch4,
+    mode_df
 ]

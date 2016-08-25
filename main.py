@@ -95,17 +95,16 @@ if args.arg == 'config' or force_config:
         print('tx_{}.label Down (byte/s)'.format(switch_index))
         print('tx_{}.draw AREA'.format(switch_index))
         print('tx_{}.colour 8BC34A'.format(switch_index))
+    elif mode == 'freebox-df':
+        print('graph_title Disk usage in percent')
+        print('graph_vlabel %')
+        print('internal.label internal')
+        print('internal.draw LINE')
 
     sys.exit(0)
 
 
-def query_data():
-    # Load graph info
-    uri = freebox.get_api_call_uri() + 'rrd/'
-    fields = get_fields(mode)
-    db = get_db(fields[0])
-
-    # Compute date_start & date_end
+def get_dates():
     now = datetime.datetime.now()  # math.ceil(time.time())
     now = now.replace(second=0, microsecond=0)
     date_end = now.replace(minute=now.minute - now.minute % 5)  # Round to lowest 5 minutes
@@ -113,13 +112,13 @@ def query_data():
     date_end_timestamp = math.ceil(time.mktime(date_end.timetuple()))
     date_start_timestamp = math.ceil(time.mktime(date_start.timetuple()))
 
-    params = {
-        'db': db,
-        'fields': fields,
-        'date_start': date_start_timestamp,
-        'date_end': date_end_timestamp
+    return {
+        'start': date_start_timestamp,
+        'end': date_end_timestamp
     }
 
+
+def call_api(uri, params):
     # Build request
     r = requests.get(uri, params=params, headers={
         'X-Fbx-App-Auth': freebox.session_token
@@ -134,13 +133,79 @@ def query_data():
             return
         else:
             # Unknown error (http://dev.freebox.fr/sdk/os/login/#authentication-errors)
-            print('Unknown API error "{}": {}'.format(
+            print('Unknown RRD API error "{}": {}'.format(
                 r_json['error_code'],
                 r_json['msg']
             ))
             sys.exit(1)
 
-    data = r_json['result']['data']
+    return r_json['result']
+
+
+def query_data():
+    if mode == mode_df:
+        query_storage_data()
+    else:
+        query_rrd_data()
+
+
+def query_storage_data():
+    # Compute date_start & date_end
+    dates = get_dates()
+    date_start_timestamp = dates['start']
+    date_end_timestamp = dates['end']
+
+    # Get a list of all connected disks
+    data = call_api(freebox.get_api_call_uri('storage/disk/'), {
+        'date_start': date_start_timestamp,
+        'date_end': date_end_timestamp
+    })
+
+    # Find internal disk
+    internal_disk = None
+    for disk in data:
+        if disk.get('type') == 'internal':
+            internal_disk = disk
+
+    if internal_disk is None:
+        print('Could not find internal disk. Connect to Freebox OS to diagnose it')
+        sys.exit(1)
+
+    # Get disk usage
+    disk_id = internal_disk.get('id')
+    data = call_api(freebox.get_api_call_uri('storage/disk/' + str(disk_id)), {
+        'date_start': date_start_timestamp,
+        'date_end': date_end_timestamp
+    })
+
+    partitions = data.get('partitions')
+    if len(partitions) != 1:
+        print('Disk {} contains {} partitions. This is not supported.'.format(disk_id, len(partitions)))
+        sys.exit(1)
+
+    partition = partitions[0]
+    used_bytes = partition.get('used_bytes')
+    total_bytes = partition.get('total_bytes')
+
+    print('internal.value {}'.format(round(used_bytes*100/total_bytes, 2)))
+
+
+def query_rrd_data():
+    # Load graph info
+    fields = get_fields(mode)
+    db = get_db(fields[0])
+
+    # Compute date_start & date_end
+    dates = get_dates()
+    date_start_timestamp = dates['start']
+    date_end_timestamp = dates['end']
+
+    data = call_api(freebox.get_api_call_uri('rrd/'), {
+        'db': db,
+        'fields': fields,
+        'date_start': date_start_timestamp,
+        'date_end': date_end_timestamp
+    })['data']
 
     # Sum up data
     sums = {}
