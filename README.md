@@ -1,9 +1,9 @@
 # Freebox-Revolution-munin
-*Watch Freebox Revolution's networking stats using munin*
+*Freebox Revolution's stats monitoring using munin*
 
-| ![freebox-traffic](doc/freebox_traffic-day.png) | ![freebox-xdsl](doc/freebox_xdsl-day.png) | ![freebox-temp](doc/freebox_temp-day.png) | ![freebox-switch1](doc/freebox_switch1-day.png) | ... | ![freebox-switch4](doc/freebox_switch4-day.png) |
-|:---:|:---:|:---:|:---:|:---:|:---:|
-| freebox-traffic | freebox-xdsl | freebox-temp | freebox-switch1 | ... | freebox-switch4 |
+| ![freebox-traffic](doc/freebox_traffic-day.png) | ![freebox-xdsl](doc/freebox_xdsl-day.png) | ![freebox-temp](doc/freebox_temp-day.png) | ![freebox-switch1](doc/freebox_switch1-day.png) | ... | ![freebox-switch4](doc/freebox_switch4-day.png) | (missing graph) |
+|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| freebox-traffic | freebox-xdsl | freebox-temp | freebox-switch1 | ... | freebox-switch4 | freebox-df |
 
 ## Usage
 
@@ -30,6 +30,7 @@
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-switch2
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-switch3
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-switch4
+    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-df
     
     service munin-node restart
     ```
