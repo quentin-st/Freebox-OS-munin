@@ -184,10 +184,11 @@ def query_storage_data():
         sys.exit(1)
 
     partition = partitions[0]
+    free_bytes = partition.get('free_bytes')
     used_bytes = partition.get('used_bytes')
-    total_bytes = partition.get('total_bytes')
 
-    print('internal.value {}'.format(round(used_bytes*100/total_bytes, 2)))
+    percent = used_bytes * 100 / (free_bytes+used_bytes)
+    print('internal.value {}'.format(round(percent, 2)))
 
 
 def query_rrd_data():
