@@ -104,21 +104,7 @@ if args.arg == 'config' or force_config:
     sys.exit(0)
 
 
-def get_dates():
-    now = datetime.datetime.now()  # math.ceil(time.time())
-    now = now.replace(second=0, microsecond=0)
-    date_end = now.replace(minute=now.minute - now.minute % 5)  # Round to lowest 5 minutes
-    date_start = now - datetime.timedelta(minutes=5)  # Remove 5 minutes from date_end
-    date_end_timestamp = math.ceil(time.mktime(date_end.timetuple()))
-    date_start_timestamp = math.ceil(time.mktime(date_start.timetuple()))
-
-    return {
-        'start': date_start_timestamp,
-        'end': date_end_timestamp
-    }
-
-
-def call_api(uri, params):
+def call_api(uri, params=None):
     # Build request
     r = requests.get(uri, params=params, headers={
         'X-Fbx-App-Auth': freebox.session_token
@@ -150,16 +136,8 @@ def query_data():
 
 
 def query_storage_data():
-    # Compute date_start & date_end
-    dates = get_dates()
-    date_start_timestamp = dates['start']
-    date_end_timestamp = dates['end']
-
     # Get a list of all connected disks
-    data = call_api(freebox.get_api_call_uri('storage/disk/'), {
-        'date_start': date_start_timestamp,
-        'date_end': date_end_timestamp
-    })
+    data = call_api(freebox.get_api_call_uri('storage/disk/'))
 
     # Find internal disk
     internal_disk = None
@@ -173,10 +151,7 @@ def query_storage_data():
 
     # Get disk usage
     disk_id = internal_disk.get('id')
-    data = call_api(freebox.get_api_call_uri('storage/disk/' + str(disk_id)), {
-        'date_start': date_start_timestamp,
-        'date_end': date_end_timestamp
-    })
+    data = call_api(freebox.get_api_call_uri('storage/disk/' + str(disk_id)))
 
     partitions = data.get('partitions')
     if len(partitions) != 1:
@@ -197,9 +172,12 @@ def query_rrd_data():
     db = get_db(fields[0])
 
     # Compute date_start & date_end
-    dates = get_dates()
-    date_start_timestamp = dates['start']
-    date_end_timestamp = dates['end']
+    now = datetime.datetime.now()  # math.ceil(time.time())
+    now = now.replace(second=0, microsecond=0)
+    date_end = now.replace(minute=now.minute - now.minute % 5)  # Round to lowest 5 minutes
+    date_start = now - datetime.timedelta(minutes=5)  # Remove 5 minutes from date_end
+    date_end_timestamp = math.ceil(time.mktime(date_end.timetuple()))
+    date_start_timestamp = math.ceil(time.mktime(date_start.timetuple()))
 
     data = call_api(freebox.get_api_call_uri('rrd/'), {
         'db': db,
