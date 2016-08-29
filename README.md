@@ -7,6 +7,12 @@
 
 ## Usage
 
+0. This plugin relies on `requests`:
+
+    ```bash
+    pip3 install requests
+    ```
+
 1. Clone this project on your server:
     
     ```bash
