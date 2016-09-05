@@ -17,12 +17,6 @@ from modes import *
 # Configuration
 config_category = 'freebox'  # 'network' would be a great alternative
 
-# Useful for development
-force_auth = False
-force_config = False
-force_mode = False
-forced_mode = mode_traffic
-
 app_id = 'freebox-revolution-munin'
 app_name = 'Freebox-Revolution-munin'
 app_version = '1.0.0'
@@ -32,16 +26,15 @@ device_name = socket.gethostname()
 # Munin config mode
 parser = argparse.ArgumentParser()
 parser.add_argument('arg', nargs='?')
+parser.add_argument('--mode', default=__file__.split('/')[-1])  # Mode, determined by symlink name
 args = parser.parse_args()
 
 # Freebox authorization
-if args.arg == 'authorize' or force_auth:
+if args.arg == 'authorize':
     api_authorize(app_id, app_name, app_version, device_name)
 
 # Mode, determined by symlink name
-mode = __file__.split('/')[-1]
-if force_mode:
-    mode = forced_mode
+mode = args.mode
 
 if mode not in modes:
     print('Unknown mode {}'.format(mode))
@@ -49,7 +42,7 @@ if mode not in modes:
     sys.exit(1)
 
 
-if args.arg == 'config' or force_config:
+if args.arg == 'config':
     print('graph_category {}'.format(config_category))
 
     if mode == 'freebox-traffic':
