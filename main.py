@@ -8,6 +8,7 @@ import socket
 import datetime
 import time
 import math
+import re
 
 from db import *
 from fields import *
@@ -42,72 +43,9 @@ if mode not in modes:
     sys.exit(1)
 
 
-if args.arg == 'config':
-    print('graph_category {}'.format(config_category))
-
-    if mode == 'freebox-traffic':
-        print('graph_title Freebox traffic')
-        print('graph_vlabel byte in (-) / out (+) per second')
-        print('rate_up.label Up traffic (byte/s)')
-        print('rate_up.draw AREA')
-        print('rate_up.colour F44336')
-        print('bw_up.label Up bandwidth (byte/s)')
-        print('bw_up.draw LINE')
-        print('bw_up.colour 407DB5')
-        print('rate_down.label Down traffic (byte/s)')
-        print('rate_down.draw AREA')
-        print('rate_down.colour 8BC34A')
-        print('bw_down.label Down bandwidth (byte/s)')
-        print('bw_down.draw LINE')
-        print('bw_down.colour 407DB5')
-    elif mode == 'freebox-temp':
-        print('graph_title Freebox temperature')
-        print('graph_vlabel temperature in C')
-        print('cpum.label CPUM')
-        print('cpum.colour EDC240')
-        print('cpum.warning 80')
-        print('cpum.critical 90')
-        print('cpub.label CPUB')
-        print('cpub.colour AFD8F8')
-        print('cpub.warning 80')
-        print('cpub.critical 90')
-        print('sw.label SW')
-        print('sw.colour CB4B4B')
-        print('sw.warning 60')
-        print('sw.critical 70')
-        print('hdd.label HDD')
-        print('hdd.colour 4DA74D')
-        print('hdd.warning 55')
-        print('hdd.critical 65')
-    elif mode == 'freebox-xdsl':
-        print('graph_title xDSL')
-        print('graph_vlabel xDSL noise margin (dB)')
-        print('snr_up.label Up')
-        print('snr_up.colour CB4B4B')
-        print('snr_down.label Down')
-        print('snr_down.colour 4DA74D')
-    elif mode.startswith('freebox-switch'):
-        switch_index = mode[-1]
-        print('graph_title Switch port #{} traffic'.format(switch_index))
-        print('graph_vlabel byte in (-) / out (+) per second')
-        print('rx_{}.label Up (byte/s)'.format(switch_index))
-        print('rx_{}.draw AREA'.format(switch_index))
-        print('rx_{}.colour F44336'.format(switch_index))
-        print('tx_{}.label Down (byte/s)'.format(switch_index))
-        print('tx_{}.draw AREA'.format(switch_index))
-        print('tx_{}.colour 8BC34A'.format(switch_index))
-    elif mode == 'freebox-df':
-        print('graph_title Disk usage in percent')
-        print('graph_args --lower-limit 0 --upper-limit 100')
-        print('graph_vlabel %')
-        print('internal.min 0')
-        print('internal.max 100')
-        print('internal.warning 85')
-        print('internal.critical 95')
-        print('internal.label internal')
-        print('internal.draw LINE')
-
-    sys.exit(0)
+# From https://github.com/yhat/rodeo/issues/90#issuecomment-98790197
+def slugify(text):
+    return re.sub(r'[-\s]+', '-', (re.sub(r'[^\w\s-]', '', text).strip().lower()))
 
 
 def call_api(uri, params=None):
@@ -133,42 +71,22 @@ def call_api(uri, params=None):
     return r_json['result']
 
 
-def query_data():
-    if mode == mode_df:
-        query_storage_data()
-    else:
-        query_rrd_data()
+def get_connected_disks():
+    return call_api(freebox.get_api_call_uri('storage/disk/'))
 
 
 def query_storage_data():
-    # Get a list of all connected disks
-    data = call_api(freebox.get_api_call_uri('storage/disk/'))
+    disks = get_connected_disks()
 
-    # Find internal disk
-    internal_disk = None
-    for disk in data:
-        if disk.get('type') == 'internal':
-            internal_disk = disk
+    for disk in disks:
+        for partition in disk.get('partitions'):
+            slug = slugify(partition.get('label'))
 
-    if internal_disk is None:
-        print('Could not find internal disk. Connect to Freebox OS to diagnose it')
-        sys.exit(1)
+            free_bytes = partition.get('free_bytes')
+            used_bytes = partition.get('used_bytes')
 
-    # Get disk usage
-    disk_id = internal_disk.get('id')
-    data = call_api(freebox.get_api_call_uri('storage/disk/' + str(disk_id)))
-
-    partitions = data.get('partitions')
-    if len(partitions) != 1:
-        print('Disk {} contains {} partitions. This is not supported.'.format(disk_id, len(partitions)))
-        sys.exit(1)
-
-    partition = partitions[0]
-    free_bytes = partition.get('free_bytes')
-    used_bytes = partition.get('used_bytes')
-
-    percent = used_bytes * 100 / (free_bytes+used_bytes)
-    print('internal.value {}'.format(round(percent, 2)))
+            percent = used_bytes * 100 / (free_bytes+used_bytes)
+            print('{}.value {}'.format(slug, round(percent, 2)))
 
 
 def query_rrd_data():
@@ -228,10 +146,91 @@ def query_rrd_data():
         print('{}.value {}'.format(key, value))
 
 
-# Query data
 freebox = get_freebox()
 if freebox is None:
     print('Could not load Freebox from saved state.')
     sys.exit(1)
 
-query_data()
+if args.arg == 'config':
+    print('graph_category {}'.format(config_category))
+
+    if mode == 'freebox-traffic':
+        print('graph_title Freebox traffic')
+        print('graph_vlabel byte in (-) / out (+) per second')
+        print('rate_up.label Up traffic (byte/s)')
+        print('rate_up.draw AREA')
+        print('rate_up.colour F44336')
+        print('bw_up.label Up bandwidth (byte/s)')
+        print('bw_up.draw LINE')
+        print('bw_up.colour 407DB5')
+        print('rate_down.label Down traffic (byte/s)')
+        print('rate_down.draw AREA')
+        print('rate_down.colour 8BC34A')
+        print('bw_down.label Down bandwidth (byte/s)')
+        print('bw_down.draw LINE')
+        print('bw_down.colour 407DB5')
+    elif mode == 'freebox-temp':
+        print('graph_title Freebox temperature')
+        print('graph_vlabel temperature in C')
+        print('cpum.label CPUM')
+        print('cpum.colour EDC240')
+        print('cpum.warning 80')
+        print('cpum.critical 90')
+        print('cpub.label CPUB')
+        print('cpub.colour AFD8F8')
+        print('cpub.warning 80')
+        print('cpub.critical 90')
+        print('sw.label SW')
+        print('sw.colour CB4B4B')
+        print('sw.warning 60')
+        print('sw.critical 70')
+        print('hdd.label HDD')
+        print('hdd.colour 4DA74D')
+        print('hdd.warning 55')
+        print('hdd.critical 65')
+    elif mode == 'freebox-xdsl':
+        print('graph_title xDSL')
+        print('graph_vlabel xDSL noise margin (dB)')
+        print('snr_up.label Up')
+        print('snr_up.colour CB4B4B')
+        print('snr_down.label Down')
+        print('snr_down.colour 4DA74D')
+    elif mode.startswith('freebox-switch'):
+        switch_index = mode[-1]
+        print('graph_title Switch port #{} traffic'.format(switch_index))
+        print('graph_vlabel byte in (-) / out (+) per second')
+        print('rx_{}.label Up (byte/s)'.format(switch_index))
+        print('rx_{}.draw AREA'.format(switch_index))
+        print('rx_{}.colour F44336'.format(switch_index))
+        print('tx_{}.label Down (byte/s)'.format(switch_index))
+        print('tx_{}.draw AREA'.format(switch_index))
+        print('tx_{}.colour 8BC34A'.format(switch_index))
+    elif mode == 'freebox-df':
+        print('graph_title Disk usage in percent')
+        print('graph_args --lower-limit 0 --upper-limit 100')
+        print('graph_vlabel %')
+
+        disks = get_connected_disks()
+        for disk in disks:
+            for partition in disk.get('partitions'):
+                name = partition.get('label')
+                if partition.get('internal'):
+                    name += ' (interne)'
+
+                slug = slugify(name)
+
+                print('{}.min 0'.format(slug))
+                print('{}.max 100'.format(slug))
+                print('{}.warning 85'.format(slug))
+                print('{}.critical 95'.format(slug))
+                print('{}.label {}'.format(slug, name))
+                print('{}.draw LINE'.format(slug))
+
+    sys.exit(0)
+
+
+# Query data
+if mode == mode_df:
+    query_storage_data()
+else:
+    query_rrd_data()
