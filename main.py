@@ -214,10 +214,10 @@ if args.arg == 'config':
         for disk in disks:
             for partition in disk.get('partitions'):
                 name = partition.get('label')
+                slug = slugify(name)
+
                 if partition.get('internal'):
                     name += ' (interne)'
-
-                slug = slugify(name)
 
                 print('{}.min 0'.format(slug))
                 print('{}.max 100'.format(slug))
