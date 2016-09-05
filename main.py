@@ -121,8 +121,7 @@ def call_api(uri, params=None):
         if r_json['error_code'] == 'auth_required':
             # Open session and try again
             api_open_session(freebox, app_id)
-            query_data()
-            return
+            return call_api(uri, params)
         else:
             # Unknown error (http://dev.freebox.fr/sdk/os/login/#authentication-errors)
             print('Unknown RRD API error "{}": {}'.format(
