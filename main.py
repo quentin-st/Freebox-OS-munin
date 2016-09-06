@@ -18,8 +18,8 @@ from modes import *
 # Configuration
 config_category = 'freebox'  # 'network' would be a great alternative
 
-app_id = 'freebox-revolution-munin'
-app_name = 'Freebox-Revolution-munin'
+app_id = 'freebox-revolution-munin'  # Script legacy name. Changing this would break authentication
+app_name = 'Freebox-OS-munin'
 app_version = '1.0.0'
 device_name = socket.gethostname()
 

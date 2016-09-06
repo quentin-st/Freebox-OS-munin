@@ -1,5 +1,5 @@
-# Freebox-Revolution-munin
-*Freebox Revolution's stats monitoring using munin*
+# Freebox-OS-munin
+*Freebox Revolution & Freebox 4K's stats monitoring using munin*
 
 | ![freebox-traffic](doc/freebox_traffic-day.png) | ![freebox-xdsl](doc/freebox_xdsl-day.png) | ![freebox-temp](doc/freebox_temp-day.png) | ![freebox-switch1](doc/freebox_switch1-day.png) | ... | ![freebox-switch4](doc/freebox_switch4-day.png) | (missing graph) |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -16,7 +16,7 @@
 1. Clone this project on your server:
     
     ```bash
-    git clone https://github.com/chteuchteu/Freebox-Revolution-munin.git && cd Freebox-Revolution-munin
+    git clone https://github.com/chteuchteu/Freebox-OS-munin.git && cd Freebox-OS-munin
     clone_path=$(pwd)
     ```
 
