@@ -1,7 +1,7 @@
 # Freebox-OS-munin
 *Freebox Revolution & Freebox 4K's stats monitoring using munin*
 
-| ![freebox-traffic](doc/freebox_traffic-day.png) | ![freebox-xdsl](doc/freebox_xdsl-day.png) | ![freebox-temp](doc/freebox_temp-day.png) | ![freebox-switch1](doc/freebox_switch1-day.png) | ... | ![freebox-switch4](doc/freebox_switch4-day.png) | (missing graph) |
+| ![freebox-traffic](doc/freebox_traffic-day.png) | ![freebox-xdsl](doc/freebox_xdsl-day.png) | ![freebox-temp](doc/freebox_temp-day.png) | ![freebox-switch1](doc/freebox_switch1-day.png) | ... | ![freebox-switch4](doc/freebox_switch4-day.png) | ![freebox-switch4](doc/freebox_df-day.png) |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | freebox-traffic | freebox-xdsl | freebox-temp | freebox-switch1 | ... | freebox-switch4 | freebox-df |
 
