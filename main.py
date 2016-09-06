@@ -260,8 +260,7 @@ if args.arg == 'config':
                 name = partition.get('label')
                 slug = slugify(name)
 
-                if partition.get('internal'):
-                    name += ' (interne)'
+                name += " (" + disk.get('type') + ")"
 
                 print('{}.min 0'.format(slug))
                 print('{}.max 100'.format(slug))
