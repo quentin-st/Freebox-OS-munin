@@ -24,7 +24,6 @@ app_version = '1.0.0'
 device_name = socket.gethostname()
 
 
-# Munin config mode
 parser = argparse.ArgumentParser()
 parser.add_argument('arg', nargs='?')
 parser.add_argument('--mode', default=__file__.split('/')[-1])  # Mode, determined by symlink name
@@ -87,6 +86,15 @@ def query_storage_data():
 
             percent = used_bytes * 100 / (free_bytes+used_bytes)
             print('{}.value {}'.format(slug, round(percent, 2)))
+
+
+def query_xdsl_errors():
+    data = call_api(freebox.get_api_call_uri('connection/xdsl/'))
+
+    for kind in ['down', 'up']:
+        for field in get_fields(mode):
+            field_slug = '{}_{}'.format(field, kind)
+            print('{}.value {}'.format(field_slug, data.get(kind).get(field)))
 
 
 def query_rrd_data():
@@ -195,6 +203,17 @@ if args.arg == 'config':
         print('snr_up.colour CB4B4B')
         print('snr_down.label Down')
         print('snr_down.colour 4DA74D')
+    elif mode == 'freebox-xdsl-errors':
+        print('graph_title xDSL errors')
+        print('graph_vlabel xDSL errors since last restart')
+        print('graph_args --lower-limit 0')
+
+        for kind in ['down', 'up']:
+            for field in get_fields(mode):
+                field_slug = '{}_{}'.format(field, kind)
+                print('{}.label {} {} errors'.format(field_slug, field.upper(), kind))
+                print('{}.min 0'.format(field_slug))
+                print('{}.draw LINE'.format(field_slug))
     elif mode.startswith('freebox-switch'):
         switch_index = mode[-1]
         print('graph_title Switch port #{} traffic'.format(switch_index))
@@ -232,5 +251,7 @@ if args.arg == 'config':
 # Query data
 if mode == mode_df:
     query_storage_data()
+elif mode == mode_xdsl_errors:
+    query_xdsl_errors()
 else:
     query_rrd_data()

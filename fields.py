@@ -16,6 +16,13 @@ field_hdd = 'hdd'
 field_snr_down = 'snr_down'
 field_snr_up = 'snr_up'
 
+# mode_xdsl_errors
+field_fec = 'fec'
+field_crc = 'crc'
+field_hec = 'hec'
+field_es = 'es'
+field_ses = 'ses'
+
 # mode_switch1
 field_rx1 = 'rx_1'
 field_tx1 = 'tx_1'
@@ -45,6 +52,13 @@ fields = {
     mode_xdsl: [
         field_snr_down,
         field_snr_up
+    ],
+    mode_xdsl_errors: [
+        field_fec,
+        field_crc,
+        field_hec,
+        field_es,
+        field_ses
     ],
     mode_switch1: [
         field_rx1,
