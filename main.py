@@ -211,7 +211,7 @@ if args.arg == 'config':
         for kind in ['down', 'up']:
             for field in get_fields(mode):
                 field_slug = '{}_{}'.format(field, kind)
-                print('{}.label {} {} errors'.format(field_slug, field.upper(), kind))
+                print('{}.label {}'.format(field_slug, kind.title() + ' ' + xdsl_errors_fields_descriptions.get(field)))
                 print('{}.min 0'.format(field_slug))
                 print('{}.draw LINE'.format(field_slug))
     elif mode.startswith('freebox-switch'):

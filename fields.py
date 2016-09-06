@@ -78,6 +78,14 @@ fields = {
     ]
 }
 
+xdsl_errors_fields_descriptions = {
+    field_fec: 'FEC (Forward Error Connection)',
+    field_crc: 'CRC (Cyclic Redundancy Check)',
+    field_hec: 'HEC (Header Error Control)',
+    field_es: 'ES (Errored Seconds)',
+    field_ses: 'SES (Severely Errored Seconds)'
+}
+
 
 def get_fields(mode):
     if mode not in modes:
