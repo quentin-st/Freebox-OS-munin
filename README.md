@@ -7,30 +7,29 @@
 
 ## Usage
 
-0. This plugin relies on `requests`:
+1. This plugin relies on `requests`:
 
     ```bash
     pip3 install requests
     ```
 
-1. Clone this project on your server:
+2. Clone this project on your server:
     
     ```bash
     git clone https://github.com/chteuchteu/Freebox-OS-munin.git && cd Freebox-OS-munin
     clone_path=$(pwd)
     ```
 
-2. Launch authorization script
+3. Launch authorization script
 
     ```bash
     ./main.py authorize
     ```
 
-3. Install the plugins
+4. Install the plugins
 
-> Tip: you don't have to symlink each mode. Skip some if you don't need all information
+    > Tip: you don't have to symlink each mode. Skip some if you don't need all information
 
-    Link creation
     ```bash
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-traffic
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-temp
@@ -46,7 +45,7 @@
     service munin-node restart
     ```
 
-4. Add plugin configuration to `/etc/munin/plugin-conf.d/munin-node`
+5. Add plugin configuration to `/etc/munin/plugin-conf.d/munin-node`
    ```bash
    sudo nano /etc/munin/plugin-conf.d/munin-node
    ```
@@ -62,7 +61,7 @@
    sudo service munin-node restart
    ```
 
-5. Test it
+6. Test it
 
     ```
     munin-run freebox-traffic
