@@ -1,6 +1,18 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+""" This script provides munin scripts for Freebox OS stats.
+ Freebox Revolution & Freebox 4K are supported for the following stats:
+ - traffic,
+ - temp,
+ - xdsl,
+ - xdsl_errors,
+ - switch1,
+ - switch2,
+ - switch3,
+ - switch4,
+ - df """
+
 import argparse
 import sys
 import requests
@@ -15,13 +27,26 @@ from fields import *
 from freebox import api_authorize, api_open_session, get_freebox
 from modes import *
 
+###############
 # Configuration
-config_category = 'freebox'  # 'network' would be a great alternative
+###############
+MUNIN_CATEGORY = 'freebox'  # 'network' would be a great alternative
+
 
 app_id = 'freebox-revolution-munin'  # Script legacy name. Changing this would break authentication
 app_name = 'Freebox-OS-munin'
 app_version = '1.0.0'
 device_name = socket.gethostname()
+
+__author__ = 'Quentin Stoeckel'
+__copyright__ = 'Copyright 2016, Quentin Stoeckel and contributors'
+__credits__ = ['Contributors at https://github.com/chteuchteu/Freebox-OS-munin/graphs/contributors']
+
+__license__ = 'gpl-v2'
+__version__ = app_version
+__maintainer__ = "chteuchteu"
+__email__ = 'stoeckel.quentin@gmail.com'
+__status__ = 'Production'
 
 
 parser = argparse.ArgumentParser()
@@ -160,7 +185,7 @@ if freebox is None:
     sys.exit(1)
 
 if args.arg == 'config':
-    print('graph_category {}'.format(config_category))
+    print('graph_category {}'.format(MUNIN_CATEGORY))
 
     if mode == 'freebox-traffic':
         print('graph_title Freebox traffic')
