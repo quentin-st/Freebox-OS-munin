@@ -112,6 +112,20 @@ def query_storage_data():
             percent = used_bytes * 100 / (free_bytes+used_bytes)
             print('{}.value {}'.format(slug, round(percent, 2)))
 
+def query_storagespin_data():
+    disks = get_connected_disks()
+
+    for disk in disks:
+        slug = slugify(disk.get('model'))
+
+        state = disk.get('spinning')
+
+        if state is True:
+            print('{}.value 1'.format(slug))
+            print('{}_down.value 0'.format(slug))
+        else:
+            print('{}.value 0'.format(slug))
+            print('{}_down.value 1'.format(slug))
 
 def query_xdsl_errors():
     data = call_api(freebox.get_api_call_uri('connection/xdsl/'))
@@ -268,6 +282,28 @@ if args.arg == 'config':
                 print('{}.critical 95'.format(slug))
                 print('{}.label {}'.format(slug, name))
                 print('{}.draw LINE'.format(slug))
+    elif mode == 'freebox-hddspin':
+        print('graph_title Spinning status for Freebox disks')
+        print('graph_args --lower-limit 0 --upper-limit 1')
+        print('graph_vlabel Disk state (active/sleep)')
+
+        disks = get_connected_disks()
+        for disk in disks:
+
+            name = disk.get('model')
+            slug = slugify(name)
+
+            name += " (" + disk.get('type') + ")"
+
+            print('{}.min 0'.format(slug))
+            print('{}.max 1'.format(slug))
+            print('{}.label {}'.format(slug, name))
+            print('{}.draw AREASTACK'.format(slug))
+            print('{}_down.min 0'.format(slug))
+            print('{}_down.max 1'.format(slug))
+            print('{}_down.label {} - OFF'.format(slug, name))
+            print('{}_down.draw AREASTACK'.format(slug))
+            print('{}_down.colour ffffff'.format(slug))
 
     sys.exit(0)
 
@@ -275,6 +311,8 @@ if args.arg == 'config':
 # Query data
 if mode == mode_df:
     query_storage_data()
+elif mode == mode_hddspin:
+    query_storagespin_data()
 elif mode == mode_xdsl_errors:
     query_xdsl_errors()
 else:
