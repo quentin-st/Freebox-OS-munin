@@ -26,7 +26,13 @@
     ./main.py authorize
     ```
 
-4. Install the plugins
+4. Update permissions on authorization file
+
+    ```bash
+    chmod 0600 ./freebox.json
+    ```
+
+5. Install the plugins
 
     > Tip: you don't have to symlink each mode. Skip some if you don't need all information
 
@@ -45,23 +51,24 @@
     service munin-node restart
     ```
 
-5. Add plugin configuration to `/etc/munin/plugin-conf.d/munin-node`
+6. Add plugin configuration to `/etc/munin/plugin-conf.d/munin-node`
    ```bash
    sudo nano /etc/munin/plugin-conf.d/munin-node
    ```
 
-   Insert :
+   Insert the following lines at the end
    ```bash
    [freebox*]
    user root
    ```
+   > Tip: You can replace `root` by the authorization file owner
 
    Restart munin node service
    ```bash
    sudo service munin-node restart
    ```
 
-6. Test it
+7. Test it
 
     ```
     munin-run freebox-traffic
