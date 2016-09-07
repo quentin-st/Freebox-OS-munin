@@ -354,7 +354,7 @@ if freebox is None:
 
 if args.arg == 'config':
     print_config()
-    sys.exit(1)
+    sys.exit(0)
 
 # Query data
 if mode == mode_df:
