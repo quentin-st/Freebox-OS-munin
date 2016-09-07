@@ -186,6 +186,21 @@ def print_config():
         print('rx_throttling.colour 407DB5')
 
 
+def query_data():
+    if mode == mode_df:
+        query_storage_data()
+    elif mode == mode_hddspin:
+        query_storagespin_data()
+    elif mode == mode_xdsl_errors:
+        query_xdsl_errors()
+    elif mode == mode_transmission_tasks:
+        query_transmission_tasks_data()
+    elif mode == mode_transmission_traffic:
+        query_transmission_traffic_data()
+    else:
+        query_rrd_data()
+
+
 def query_storage_data():
     disks = freebox.api_get_connected_disks()
 
@@ -301,12 +316,13 @@ def query_rrd_data():
 
 # Freebox authorization
 if args.arg == 'authorize':
-    api_authorize()
+    exit_code = api_authorize()
+    sys.exit(exit_code)
 
 # Mode, determined by symlink name
 mode = args.mode
 
-if mode not in modes:
+if mode not in modes and mode != 'all':
     print('Unknown mode {}'.format(mode))
     print('Accepted modes are {}'.format(', '.join(modes)))
     sys.exit(1)
@@ -320,16 +336,14 @@ if args.arg == 'config':
     print_config()
     sys.exit(0)
 
+# Great for testing
+if mode == 'all':
+    for m in modes:
+        mode = m
+        print_config()
+        query_data()
+
+    sys.exit(0)
+
 # Query data
-if mode == mode_df:
-    query_storage_data()
-elif mode == mode_hddspin:
-    query_storagespin_data()
-elif mode == mode_xdsl_errors:
-    query_xdsl_errors()
-elif mode == mode_transmission_tasks:
-    query_transmission_tasks_data()
-elif mode == mode_transmission_traffic:
-    query_transmission_traffic_data()
-else:
-    query_rrd_data()
+query_data()

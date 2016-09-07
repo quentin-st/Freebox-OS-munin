@@ -94,7 +94,7 @@ def api_authorize():
 
     if not r_json['success']:
         print('Error while authenticating: {}'.format(r_json))
-        sys.exit(1)
+        return 1
 
     app_token = r_json['result']['app_token']
     track_id = r_json['result']['track_id']
@@ -113,10 +113,10 @@ def api_authorize():
             sys.stdout.flush()
         elif status == 'timeout':
             print('\nAuthorization request timeouted. Re-run this script, but please go faster next time')
-            sys.exit(1)
+            return 1
         elif status == 'denied':
             print('\nYou denied authorization request.')
-            sys.exit(1)
+            return 1
         elif status == 'granted':
             challenge = r2_json['result']['challenge']
             break
@@ -129,7 +129,7 @@ def api_authorize():
     # That's a success
     print('\nSuccessfully authenticated script. Exiting.')
 
-    sys.exit(0)
+    return 0
 
 
 def encode_app_token(app_token, challenge):

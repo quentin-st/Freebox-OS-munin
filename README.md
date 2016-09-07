@@ -93,3 +93,10 @@ See [below](#graphs) for some screenshots
     *(missing screenshot)*
 - freebox-transmission-traffic
     *(missing screenshot)*
+
+## Contribute
+Fork this repository, and submit pull requests upon master branch.
+
+> Tip: when making changes that affects all plugins, you can tests them all
+by running `./main.py --mode all`. This will execute each plugin in both config
+& poll modes.
