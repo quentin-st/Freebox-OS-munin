@@ -50,6 +50,12 @@ field_nb_tasks_seeding = 'nb_tasks_seeding'
 # field_nb_tasks_active = 'nb_tasks_active'  # Total active
 # nb_tasks = 'nb_tasks'  # Total
 
+# mode_transmission_rate
+field_rx_throttling = 'throttling_rate.rx_rate'
+field_tx_throttling = 'throttling_rate.tx_rate'
+field_rx_rate = 'rx_rate'
+field_tx_rate = 'tx_rate'
+
 fields = {
     mode_traffic: [
         field_rate_down,
@@ -101,6 +107,12 @@ fields = {
         field_nb_tasks_error,
         field_nb_tasks_stopping,
         field_nb_tasks_seeding
+    ],
+    mode_transmission_traffic: [
+        field_rx_throttling,
+        field_tx_throttling,
+        field_rx_rate,
+        field_tx_rate,
     ]
 }
 

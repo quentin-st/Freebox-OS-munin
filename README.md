@@ -46,6 +46,7 @@ See [below](#graphs) for some screenshots
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-df
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-hddspin
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-transmission-tasks
+    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-transmission-traffic
     
     service munin-node restart
     ```
@@ -89,4 +90,6 @@ See [below](#graphs) for some screenshots
 - freebox-hddspin
     ![freebox-hddspin](doc/freebox_hddspin-day.png)
 - freebox-transmission-tasks
+    *(missing screenshot)*
+- freebox-transmission-traffic
     *(missing screenshot)*

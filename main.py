@@ -12,7 +12,8 @@
  - switch3,
  - switch4,
  - df
- - transmission_tasks """
+ - transmission_tasks
+ - transmission_traffic """
 
 import argparse
 import sys
@@ -187,6 +188,21 @@ def print_config():
             print('{}.min 0'.format(field))
             print('{}.label Number of {} tasks'.format(field, field.split('_')[-1]))
             print('{}.draw AREASTACK'.format(field))
+    elif mode == mode_transmission_traffic:
+        print('graph_title Transmission traffic')
+        print('graph_vlabel byte in (-) / out (+) per second')
+        print('rx_rate.label Up (byte/s)')
+        print('rx_rate.draw AREA')
+        print('rx_rate.colour F44336')
+        print('rx_throttling.label Up throttling (byte/s)')
+        print('rx_throttling.draw LINE')
+        print('rx_throttling.colour 407DB5')
+        print('tx_rate.label Down (byte/s)')
+        print('tx_rate.draw AREA')
+        print('tx_rate.colour 8BC34A')
+        print('tx_throttling.label Down throttling (byte/s)')
+        print('tx_throttling.draw LINE')
+        print('tx_throttling.colour 407DB5')
 
 
 def call_api(endpoint, params=None):
@@ -257,11 +273,21 @@ def query_xdsl_errors():
             print('{}.value {}'.format(field_slug, data.get(kind).get(field)))
 
 
-def query_transmission_data():
+def query_transmission_tasks_data():
     data = call_api('downloads/stats/')
 
     for field in get_fields(mode):
         print('{}.value {}'.format(field, data.get(field)))
+
+
+def query_transmission_traffic_data():
+    data = call_api('downloads/stats/')
+
+    # When combining upload+download on the same graph, download should be negative
+    print('rx_rate.value {}'.format(data.get(field_rx_rate)))
+    print('rx_throttling.value {}'.format(data.get('throttling_rate').get('rx_rate')))
+    print('tx_rate.value {}'.format(-1 * data.get(field_tx_rate)))
+    print('tx_throttling.value {}'.format(-1 * data.get('throttling_rate').get('tx_rate')))
 
 
 def query_rrd_data():
@@ -338,6 +364,8 @@ elif mode == mode_hddspin:
 elif mode == mode_xdsl_errors:
     query_xdsl_errors()
 elif mode == mode_transmission_tasks:
-    query_transmission_data()
+    query_transmission_tasks_data()
+elif mode == mode_transmission_traffic:
+    query_transmission_traffic_data()
 else:
     query_rrd_data()
