@@ -11,7 +11,8 @@
  - switch2,
  - switch3,
  - switch4,
- - df """
+ - df
+ - transmission_tasks """
 
 import argparse
 import sys
@@ -72,7 +73,9 @@ def slugify(text):
     return re.sub(r'[-\s]+', '_', (re.sub(r'[^\w\s-]', '', text).strip().lower()))
 
 
-def call_api(uri, params=None):
+def call_api(endpoint, params=None):
+    uri = freebox.get_api_call_uri(endpoint)
+
     # Build request
     r = requests.get(uri, params=params, headers={
         'X-Fbx-App-Auth': freebox.session_token
@@ -96,7 +99,7 @@ def call_api(uri, params=None):
 
 
 def get_connected_disks():
-    return call_api(freebox.get_api_call_uri('storage/disk/'))
+    return call_api('storage/disk/')
 
 
 def query_storage_data():
@@ -111,6 +114,7 @@ def query_storage_data():
 
             percent = used_bytes * 100 / (free_bytes+used_bytes)
             print('{}.value {}'.format(slug, round(percent, 2)))
+
 
 def query_storagespin_data():
     disks = get_connected_disks()
@@ -127,13 +131,21 @@ def query_storagespin_data():
             print('{}.value 0'.format(slug))
             print('{}_down.value 1'.format(slug))
 
+
 def query_xdsl_errors():
-    data = call_api(freebox.get_api_call_uri('connection/xdsl/'))
+    data = call_api('connection/xdsl/')
 
     for kind in ['down', 'up']:
         for field in get_fields(mode):
             field_slug = '{}_{}'.format(field, kind)
             print('{}.value {}'.format(field_slug, data.get(kind).get(field)))
+
+
+def query_transmission_data():
+    data = call_api('downloads/stats/')
+
+    for field in get_fields(mode):
+        print('{}.value {}'.format(field, data.get(field)))
 
 
 def query_rrd_data():
@@ -149,7 +161,7 @@ def query_rrd_data():
     date_end_timestamp = math.ceil(time.mktime(date_end.timetuple()))
     date_start_timestamp = math.ceil(time.mktime(date_start.timetuple()))
 
-    data = call_api(freebox.get_api_call_uri('rrd/'), {
+    data = call_api('rrd/', {
         'db': db,
         'fields': fields,
         'date_start': date_start_timestamp,
@@ -201,7 +213,7 @@ if freebox is None:
 if args.arg == 'config':
     print('graph_category {}'.format(MUNIN_CATEGORY))
 
-    if mode == 'freebox-traffic':
+    if mode == mode_traffic:
         print('graph_title Freebox traffic')
         print('graph_vlabel byte in (-) / out (+) per second')
         print('rate_up.label Up traffic (byte/s)')
@@ -216,7 +228,7 @@ if args.arg == 'config':
         print('bw_down.label Down bandwidth (byte/s)')
         print('bw_down.draw LINE')
         print('bw_down.colour 407DB5')
-    elif mode == 'freebox-temp':
+    elif mode == mode_temp:
         print('graph_title Freebox temperature')
         print('graph_vlabel temperature in C')
         print('cpum.label CPUM')
@@ -235,14 +247,14 @@ if args.arg == 'config':
         print('hdd.colour 4DA74D')
         print('hdd.warning 55')
         print('hdd.critical 65')
-    elif mode == 'freebox-xdsl':
+    elif mode == mode_xdsl:
         print('graph_title xDSL')
         print('graph_vlabel xDSL noise margin (dB)')
         print('snr_up.label Up')
         print('snr_up.colour CB4B4B')
         print('snr_down.label Down')
         print('snr_down.colour 4DA74D')
-    elif mode == 'freebox-xdsl-errors':
+    elif mode == mode_xdsl_errors:
         print('graph_title xDSL errors')
         print('graph_vlabel xDSL errors since last restart')
         print('graph_args --lower-limit 0')
@@ -263,7 +275,7 @@ if args.arg == 'config':
         print('tx_{}.label Down (byte/s)'.format(switch_index))
         print('tx_{}.draw AREA'.format(switch_index))
         print('tx_{}.colour 8BC34A'.format(switch_index))
-    elif mode == 'freebox-df':
+    elif mode == mode_df:
         print('graph_title Disk usage in percent')
         print('graph_args --lower-limit 0 --upper-limit 100')
         print('graph_vlabel %')
@@ -282,14 +294,13 @@ if args.arg == 'config':
                 print('{}.critical 95'.format(slug))
                 print('{}.label {}'.format(slug, name))
                 print('{}.draw LINE'.format(slug))
-    elif mode == 'freebox-hddspin':
+    elif mode == mode_hddspin:
         print('graph_title Spinning status for Freebox disks')
         print('graph_args --lower-limit 0 --upper-limit 1')
         print('graph_vlabel Disk state (active/sleep)')
 
         disks = get_connected_disks()
         for disk in disks:
-
             name = disk.get('model')
             slug = slugify(name)
 
@@ -304,6 +315,15 @@ if args.arg == 'config':
             print('{}_down.label {} - OFF'.format(slug, name))
             print('{}_down.draw AREASTACK'.format(slug))
             print('{}_down.colour ffffff'.format(slug))
+    elif mode == mode_transmission_tasks:
+        print('graph_title Transmission tasks stats')
+        print('graph_args --lower-limit 0')
+        print('graph_vlabel #')
+
+        for field in get_fields(mode):
+            print('{}.min 0'.format(field))
+            print('{}.label Number of {} tasks'.format(field, field.split('_')[-1]))
+            print('{}.draw AREASTACK'.format(field))
 
     sys.exit(0)
 
@@ -315,5 +335,7 @@ elif mode == mode_hddspin:
     query_storagespin_data()
 elif mode == mode_xdsl_errors:
     query_xdsl_errors()
+elif mode == mode_transmission_tasks:
+    query_transmission_data()
 else:
     query_rrd_data()

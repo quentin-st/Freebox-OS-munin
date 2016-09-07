@@ -36,6 +36,20 @@ field_tx3 = 'tx_3'
 field_rx4 = 'rx_4'
 field_tx4 = 'tx_4'
 
+# mode_transmission_tasks
+field_nb_tasks_stopped = 'nb_tasks_stopped'
+field_nb_tasks_checking = 'nb_tasks_checking'
+field_nb_tasks_queued = 'nb_tasks_queued'
+field_nb_tasks_extracting = 'nb_tasks_extracting'
+field_nb_tasks_done = 'nb_tasks_done'
+field_nb_tasks_repairing = 'nb_tasks_repairing'
+field_nb_tasks_downloading = 'nb_tasks_downloading'
+field_nb_tasks_error = 'nb_tasks_error'
+field_nb_tasks_stopping = 'nb_tasks_stopping'
+field_nb_tasks_seeding = 'nb_tasks_seeding'
+# field_nb_tasks_active = 'nb_tasks_active'  # Total active
+# nb_tasks = 'nb_tasks'  # Total
+
 fields = {
     mode_traffic: [
         field_rate_down,
@@ -75,6 +89,18 @@ fields = {
     mode_switch4: [
         field_rx4,
         field_tx4
+    ],
+    mode_transmission_tasks: [
+        field_nb_tasks_stopped,
+        field_nb_tasks_checking,
+        field_nb_tasks_queued,
+        field_nb_tasks_extracting,
+        field_nb_tasks_done,
+        field_nb_tasks_repairing,
+        field_nb_tasks_downloading,
+        field_nb_tasks_error,
+        field_nb_tasks_stopping,
+        field_nb_tasks_seeding
     ]
 }
 
