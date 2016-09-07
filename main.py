@@ -191,18 +191,18 @@ def print_config():
     elif mode == mode_transmission_traffic:
         print('graph_title Transmission traffic')
         print('graph_vlabel byte in (-) / out (+) per second')
-        print('rx_rate.label Up (byte/s)')
-        print('rx_rate.draw AREA')
-        print('rx_rate.colour F44336')
-        print('rx_throttling.label Up throttling (byte/s)')
-        print('rx_throttling.draw LINE')
-        print('rx_throttling.colour 407DB5')
-        print('tx_rate.label Down (byte/s)')
+        print('tx_rate.label Up (byte/s)')
         print('tx_rate.draw AREA')
-        print('tx_rate.colour 8BC34A')
-        print('tx_throttling.label Down throttling (byte/s)')
+        print('tx_rate.colour F44336')
+        print('tx_throttling.label Up throttling (byte/s)')
         print('tx_throttling.draw LINE')
         print('tx_throttling.colour 407DB5')
+        print('rx_rate.label Down (byte/s)')
+        print('rx_rate.draw AREA')
+        print('rx_rate.colour 8BC34A')
+        print('rx_throttling.label Down throttling (byte/s)')
+        print('rx_throttling.draw LINE')
+        print('rx_throttling.colour 407DB5')
 
 
 def call_api(endpoint, params=None):
@@ -284,10 +284,10 @@ def query_transmission_traffic_data():
     data = call_api('downloads/stats/')
 
     # When combining upload+download on the same graph, download should be negative
-    print('rx_rate.value {}'.format(data.get(field_rx_rate)))
-    print('rx_throttling.value {}'.format(data.get('throttling_rate').get('rx_rate')))
-    print('tx_rate.value {}'.format(-1 * data.get(field_tx_rate)))
-    print('tx_throttling.value {}'.format(-1 * data.get('throttling_rate').get('tx_rate')))
+    print('tx_rate.value {}'.format(data.get(field_tx_rate)))
+    print('tx_throttling.value {}'.format(data.get('throttling_rate').get('tx_rate')))
+    print('rx_rate.value {}'.format(-1 * data.get(field_rx_rate)))
+    print('rx_throttling.value {}'.format(-1 * data.get('throttling_rate').get('rx_rate')))
 
 
 def query_rrd_data():
