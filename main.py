@@ -73,6 +73,122 @@ def slugify(text):
     return re.sub(r'[-\s]+', '_', (re.sub(r'[^\w\s-]', '', text).strip().lower()))
 
 
+def print_config():
+    print('graph_category {}'.format(MUNIN_CATEGORY))
+
+    if mode == mode_traffic:
+        print('graph_title Freebox traffic')
+        print('graph_vlabel byte in (-) / out (+) per second')
+        print('rate_up.label Up traffic (byte/s)')
+        print('rate_up.draw AREA')
+        print('rate_up.colour F44336')
+        print('bw_up.label Up bandwidth (byte/s)')
+        print('bw_up.draw LINE')
+        print('bw_up.colour 407DB5')
+        print('rate_down.label Down traffic (byte/s)')
+        print('rate_down.draw AREA')
+        print('rate_down.colour 8BC34A')
+        print('bw_down.label Down bandwidth (byte/s)')
+        print('bw_down.draw LINE')
+        print('bw_down.colour 407DB5')
+    elif mode == mode_temp:
+        print('graph_title Freebox temperature')
+        print('graph_vlabel temperature in C')
+        print('cpum.label CPUM')
+        print('cpum.colour EDC240')
+        print('cpum.warning 80')
+        print('cpum.critical 90')
+        print('cpub.label CPUB')
+        print('cpub.colour AFD8F8')
+        print('cpub.warning 80')
+        print('cpub.critical 90')
+        print('sw.label SW')
+        print('sw.colour CB4B4B')
+        print('sw.warning 60')
+        print('sw.critical 70')
+        print('hdd.label HDD')
+        print('hdd.colour 4DA74D')
+        print('hdd.warning 55')
+        print('hdd.critical 65')
+    elif mode == mode_xdsl:
+        print('graph_title xDSL')
+        print('graph_vlabel xDSL noise margin (dB)')
+        print('snr_up.label Up')
+        print('snr_up.colour CB4B4B')
+        print('snr_down.label Down')
+        print('snr_down.colour 4DA74D')
+    elif mode == mode_xdsl_errors:
+        print('graph_title xDSL errors')
+        print('graph_vlabel xDSL errors since last restart')
+        print('graph_args --lower-limit 0')
+
+        for kind in ['down', 'up']:
+            for field in get_fields(mode):
+                field_slug = '{}_{}'.format(field, kind)
+                print('{}.label {}'.format(field_slug, kind.title() + ' ' + xdsl_errors_fields_descriptions.get(field)))
+                print('{}.min 0'.format(field_slug))
+                print('{}.draw LINE'.format(field_slug))
+    elif mode.startswith('freebox-switch'):
+        switch_index = mode[-1]
+        print('graph_title Switch port #{} traffic'.format(switch_index))
+        print('graph_vlabel byte in (-) / out (+) per second')
+        print('rx_{}.label Up (byte/s)'.format(switch_index))
+        print('rx_{}.draw AREA'.format(switch_index))
+        print('rx_{}.colour F44336'.format(switch_index))
+        print('tx_{}.label Down (byte/s)'.format(switch_index))
+        print('tx_{}.draw AREA'.format(switch_index))
+        print('tx_{}.colour 8BC34A'.format(switch_index))
+    elif mode == mode_df:
+        print('graph_title Disk usage in percent')
+        print('graph_args --lower-limit 0 --upper-limit 100')
+        print('graph_vlabel %')
+
+        disks = get_connected_disks()
+        for disk in disks:
+            for partition in disk.get('partitions'):
+                name = partition.get('label')
+                slug = slugify(name)
+
+                name += " (" + disk.get('type') + ")"
+
+                print('{}.min 0'.format(slug))
+                print('{}.max 100'.format(slug))
+                print('{}.warning 85'.format(slug))
+                print('{}.critical 95'.format(slug))
+                print('{}.label {}'.format(slug, name))
+                print('{}.draw LINE'.format(slug))
+    elif mode == mode_hddspin:
+        print('graph_title Spinning status for Freebox disks')
+        print('graph_args --lower-limit 0 --upper-limit 1')
+        print('graph_vlabel Disk state (active/sleep)')
+
+        disks = get_connected_disks()
+        for disk in disks:
+            name = disk.get('model')
+            slug = slugify(name)
+
+            name += " (" + disk.get('type') + ")"
+
+            print('{}.min 0'.format(slug))
+            print('{}.max 1'.format(slug))
+            print('{}.label {}'.format(slug, name))
+            print('{}.draw AREASTACK'.format(slug))
+            print('{}_down.min 0'.format(slug))
+            print('{}_down.max 1'.format(slug))
+            print('{}_down.label {} - OFF'.format(slug, name))
+            print('{}_down.draw AREASTACK'.format(slug))
+            print('{}_down.colour ffffff'.format(slug))
+    elif mode == mode_transmission_tasks:
+        print('graph_title Transmission tasks stats')
+        print('graph_args --lower-limit 0')
+        print('graph_vlabel #')
+
+        for field in get_fields(mode):
+            print('{}.min 0'.format(field))
+            print('{}.label Number of {} tasks'.format(field, field.split('_')[-1]))
+            print('{}.draw AREASTACK'.format(field))
+
+
 def call_api(endpoint, params=None):
     uri = freebox.get_api_call_uri(endpoint)
 
@@ -211,122 +327,8 @@ if freebox is None:
     sys.exit(1)
 
 if args.arg == 'config':
-    print('graph_category {}'.format(MUNIN_CATEGORY))
-
-    if mode == mode_traffic:
-        print('graph_title Freebox traffic')
-        print('graph_vlabel byte in (-) / out (+) per second')
-        print('rate_up.label Up traffic (byte/s)')
-        print('rate_up.draw AREA')
-        print('rate_up.colour F44336')
-        print('bw_up.label Up bandwidth (byte/s)')
-        print('bw_up.draw LINE')
-        print('bw_up.colour 407DB5')
-        print('rate_down.label Down traffic (byte/s)')
-        print('rate_down.draw AREA')
-        print('rate_down.colour 8BC34A')
-        print('bw_down.label Down bandwidth (byte/s)')
-        print('bw_down.draw LINE')
-        print('bw_down.colour 407DB5')
-    elif mode == mode_temp:
-        print('graph_title Freebox temperature')
-        print('graph_vlabel temperature in C')
-        print('cpum.label CPUM')
-        print('cpum.colour EDC240')
-        print('cpum.warning 80')
-        print('cpum.critical 90')
-        print('cpub.label CPUB')
-        print('cpub.colour AFD8F8')
-        print('cpub.warning 80')
-        print('cpub.critical 90')
-        print('sw.label SW')
-        print('sw.colour CB4B4B')
-        print('sw.warning 60')
-        print('sw.critical 70')
-        print('hdd.label HDD')
-        print('hdd.colour 4DA74D')
-        print('hdd.warning 55')
-        print('hdd.critical 65')
-    elif mode == mode_xdsl:
-        print('graph_title xDSL')
-        print('graph_vlabel xDSL noise margin (dB)')
-        print('snr_up.label Up')
-        print('snr_up.colour CB4B4B')
-        print('snr_down.label Down')
-        print('snr_down.colour 4DA74D')
-    elif mode == mode_xdsl_errors:
-        print('graph_title xDSL errors')
-        print('graph_vlabel xDSL errors since last restart')
-        print('graph_args --lower-limit 0')
-
-        for kind in ['down', 'up']:
-            for field in get_fields(mode):
-                field_slug = '{}_{}'.format(field, kind)
-                print('{}.label {}'.format(field_slug, kind.title() + ' ' + xdsl_errors_fields_descriptions.get(field)))
-                print('{}.min 0'.format(field_slug))
-                print('{}.draw LINE'.format(field_slug))
-    elif mode.startswith('freebox-switch'):
-        switch_index = mode[-1]
-        print('graph_title Switch port #{} traffic'.format(switch_index))
-        print('graph_vlabel byte in (-) / out (+) per second')
-        print('rx_{}.label Up (byte/s)'.format(switch_index))
-        print('rx_{}.draw AREA'.format(switch_index))
-        print('rx_{}.colour F44336'.format(switch_index))
-        print('tx_{}.label Down (byte/s)'.format(switch_index))
-        print('tx_{}.draw AREA'.format(switch_index))
-        print('tx_{}.colour 8BC34A'.format(switch_index))
-    elif mode == mode_df:
-        print('graph_title Disk usage in percent')
-        print('graph_args --lower-limit 0 --upper-limit 100')
-        print('graph_vlabel %')
-
-        disks = get_connected_disks()
-        for disk in disks:
-            for partition in disk.get('partitions'):
-                name = partition.get('label')
-                slug = slugify(name)
-
-                name += " (" + disk.get('type') + ")"
-
-                print('{}.min 0'.format(slug))
-                print('{}.max 100'.format(slug))
-                print('{}.warning 85'.format(slug))
-                print('{}.critical 95'.format(slug))
-                print('{}.label {}'.format(slug, name))
-                print('{}.draw LINE'.format(slug))
-    elif mode == mode_hddspin:
-        print('graph_title Spinning status for Freebox disks')
-        print('graph_args --lower-limit 0 --upper-limit 1')
-        print('graph_vlabel Disk state (active/sleep)')
-
-        disks = get_connected_disks()
-        for disk in disks:
-            name = disk.get('model')
-            slug = slugify(name)
-
-            name += " (" + disk.get('type') + ")"
-
-            print('{}.min 0'.format(slug))
-            print('{}.max 1'.format(slug))
-            print('{}.label {}'.format(slug, name))
-            print('{}.draw AREASTACK'.format(slug))
-            print('{}_down.min 0'.format(slug))
-            print('{}_down.max 1'.format(slug))
-            print('{}_down.label {} - OFF'.format(slug, name))
-            print('{}_down.draw AREASTACK'.format(slug))
-            print('{}_down.colour ffffff'.format(slug))
-    elif mode == mode_transmission_tasks:
-        print('graph_title Transmission tasks stats')
-        print('graph_args --lower-limit 0')
-        print('graph_vlabel #')
-
-        for field in get_fields(mode):
-            print('{}.min 0'.format(field))
-            print('{}.label Number of {} tasks'.format(field, field.split('_')[-1]))
-            print('{}.draw AREASTACK'.format(field))
-
-    sys.exit(0)
-
+    print_config()
+    sys.exit(1)
 
 # Query data
 if mode == mode_df:
