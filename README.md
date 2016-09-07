@@ -1,9 +1,7 @@
 # Freebox-OS-munin
 *Freebox Revolution & Freebox 4K's stats monitoring using munin*
 
-| ![freebox-traffic](doc/freebox_traffic-day.png) | ![freebox-xdsl](doc/freebox_xdsl-day.png) | ![freebox-xdsl](doc/freebox_xdsl_errors-day.png) | ![freebox-temp](doc/freebox_temp-day.png) | ![freebox-switch1](doc/freebox_switch1-day.png) | ... | ![freebox-switch4](doc/freebox_switch4-day.png) | ![freebox-df](doc/freebox_df-day.png) | ![freebox-hddspin](doc/freebox_hddspin-day.png) |
-|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| freebox-traffic | freebox-xdsl | freebox-xdsl-errors | freebox-temp | freebox-switch1 | ... | freebox-switch4 | freebox-df | freebox-hddspin |
+See [below](#graphs) for some screenshots
 
 ## Usage
 
@@ -47,6 +45,7 @@
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-switch4
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-df
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-hddspin
+    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-transmission-tasks
     
     service munin-node restart
     ```
@@ -73,3 +72,21 @@
     ```
     munin-run freebox-traffic
     ```
+
+## Graphs
+- freebox-traffic
+    ![freebox-traffic](doc/freebox_traffic-day.png)
+- freebox-xdsl
+    ![freebox-xdsl](doc/freebox_xdsl-day.png)
+- freebox-xdsl-errors
+    ![freebox-xdsl-errors](doc/freebox_xdsl_errors-day.png)
+- freebox-temp
+    ![freebox-temp](doc/freebox_temp-day.png)
+- freebox-switch1 (1..4)
+    ![freebox-switch1)](doc/freebox_switch1-day.png)
+- freebox-df
+    ![freebox-df](doc/freebox_df-day.png)
+- freebox-hddspin
+    ![freebox-hddspin](doc/freebox_hddspin-day.png)
+- freebox-transmission-tasks
+    *(missing screenshot)*
