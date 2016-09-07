@@ -5,8 +5,13 @@ import os
 import json
 import sys
 import requests
+import socket
 
 freebox_config_file = os.path.join(os.path.dirname(__file__), 'freebox.json')
+app_id = 'freebox-revolution-munin'  # Script legacy name. Changing this would break authentication
+app_name = 'Freebox-OS-munin'
+app_version = '1.0.0'
+device_name = socket.gethostname()
 
 
 class Freebox:
@@ -29,19 +34,53 @@ class Freebox:
         return 'http://mafreebox.freebox.fr/api/v3/' + endpoint
 
     def save(self):
-        with open(freebox_config_file, 'w') as output:
-            json.dump(self.__dict__, output)
+        with open(freebox_config_file, 'w') as fh:
+            json.dump(self.__dict__, fh)
 
     @staticmethod
     def retrieve():
         freebox = Freebox()
-        with open(freebox_config_file, 'r') as input:
-            freebox.__dict__ = json.load(input)
+        with open(freebox_config_file, 'r') as fh:
+            freebox.__dict__ = json.load(fh)
 
         return freebox
 
+    def api(self, endpoint, params=None):
+        uri = self.get_api_call_uri(endpoint)
 
-def api_authorize(app_id, app_name, app_version, device_name):
+        # Build request
+        r = requests.get(uri, params=params, headers={
+            'X-Fbx-App-Auth': self.session_token
+        })
+        r_json = r.json()
+
+        if not r_json['success']:
+            if r_json['error_code'] == 'auth_required':
+                # Open session and try again
+                api_open_session(self)
+                return self.api(uri, params)
+            else:
+                # Unknown error (http://dev.freebox.fr/sdk/os/login/#authentication-errors)
+                message = 'Unknown API error "{}" on URI {} (endpoint {})'.format(
+                    r_json['error_code'],
+                    uri,
+                    endpoint
+                )
+                try:
+                    print('{}: {}'.format(message, r_json['msg']))
+                except UnicodeEncodeError:
+                    print('{}. Plus, we could not print the error message correctly.'.format(
+                        message
+                    ))
+                sys.exit(1)
+
+        return r_json['result']
+
+    def api_get_connected_disks(self):
+        return self.api('storage/disk/')
+
+
+def api_authorize():
     print('Authorizing...')
     uri = Freebox.get_api_call_uri('login/authorize/')
     r = requests.post(uri, json={
@@ -100,7 +139,7 @@ def encode_app_token(app_token, challenge):
     return hmac.new(str.encode(app_token), str.encode(challenge), hashlib.sha1).hexdigest()
 
 
-def api_open_session(freebox, app_id):
+def api_open_session(freebox):
     # Retrieve challenge
     uri = Freebox.get_api_call_uri('login/')
     r = requests.get(uri)

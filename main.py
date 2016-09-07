@@ -17,8 +17,6 @@
 
 import argparse
 import sys
-import requests
-import socket
 import datetime
 import time
 import math
@@ -26,7 +24,7 @@ import re
 
 from db import *
 from fields import *
-from freebox import api_authorize, api_open_session, get_freebox
+from freebox import app_version, api_authorize, get_freebox
 from modes import *
 
 ###############
@@ -34,11 +32,6 @@ from modes import *
 ###############
 MUNIN_CATEGORY = 'freebox'  # 'network' would be a great alternative
 
-
-app_id = 'freebox-revolution-munin'  # Script legacy name. Changing this would break authentication
-app_name = 'Freebox-OS-munin'
-app_version = '1.0.0'
-device_name = socket.gethostname()
 
 __author__ = 'Quentin Stoeckel'
 __copyright__ = 'Copyright 2016, Quentin Stoeckel and contributors'
@@ -55,18 +48,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('arg', nargs='?')
 parser.add_argument('--mode', default=__file__.split('/')[-1])  # Mode, determined by symlink name
 args = parser.parse_args()
-
-# Freebox authorization
-if args.arg == 'authorize':
-    api_authorize(app_id, app_name, app_version, device_name)
-
-# Mode, determined by symlink name
-mode = args.mode
-
-if mode not in modes:
-    print('Unknown mode {}'.format(mode))
-    print('Accepted modes are {}'.format(', '.join(modes)))
-    sys.exit(1)
 
 
 # From https://github.com/yhat/rodeo/issues/90#issuecomment-98790197
@@ -144,7 +125,7 @@ def print_config():
         print('graph_args --lower-limit 0 --upper-limit 100')
         print('graph_vlabel %')
 
-        disks = get_connected_disks()
+        disks = freebox.get_connected_disks()
         for disk in disks:
             for partition in disk.get('partitions'):
                 name = partition.get('label')
@@ -163,7 +144,7 @@ def print_config():
         print('graph_args --lower-limit 0 --upper-limit 1')
         print('graph_vlabel Disk state (active/sleep)')
 
-        disks = get_connected_disks()
+        disks = freebox.get_connected_disks()
         for disk in disks:
             name = disk.get('model')
             slug = slugify(name)
@@ -205,44 +186,8 @@ def print_config():
         print('rx_throttling.colour 407DB5')
 
 
-def call_api(endpoint, params=None):
-    uri = freebox.get_api_call_uri(endpoint)
-
-    # Build request
-    r = requests.get(uri, params=params, headers={
-        'X-Fbx-App-Auth': freebox.session_token
-    })
-    r_json = r.json()
-
-    if not r_json['success']:
-        if r_json['error_code'] == 'auth_required':
-            # Open session and try again
-            api_open_session(freebox, app_id)
-            return call_api(uri, params)
-        else:
-            # Unknown error (http://dev.freebox.fr/sdk/os/login/#authentication-errors)
-            message = 'Unknown API error "{}" on URI {} (endpoint {})'.format(
-                r_json['error_code'],
-                uri,
-                endpoint
-            )
-            try:
-                print('{}: {}'.format(message, r_json['msg']))
-            except UnicodeEncodeError:
-                print('{}. Plus, we could not print the error message correctly.'.format(
-                    message
-                ))
-            sys.exit(1)
-
-    return r_json['result']
-
-
-def get_connected_disks():
-    return call_api('storage/disk/')
-
-
 def query_storage_data():
-    disks = get_connected_disks()
+    disks = freebox.get_connected_disks()
 
     for disk in disks:
         for partition in disk.get('partitions'):
@@ -256,7 +201,7 @@ def query_storage_data():
 
 
 def query_storagespin_data():
-    disks = get_connected_disks()
+    disks = freebox.get_connected_disks()
 
     for disk in disks:
         slug = slugify(disk.get('model'))
@@ -272,7 +217,7 @@ def query_storagespin_data():
 
 
 def query_xdsl_errors():
-    data = call_api('connection/xdsl/')
+    data = freebox.api('connection/xdsl/')
 
     for kind in ['down', 'up']:
         for field in get_fields(mode):
@@ -281,14 +226,14 @@ def query_xdsl_errors():
 
 
 def query_transmission_tasks_data():
-    data = call_api('downloads/stats/')
+    data = freebox.api('downloads/stats/')
 
     for field in get_fields(mode):
         print('{}.value {}'.format(field, data.get(field)))
 
 
 def query_transmission_traffic_data():
-    data = call_api('downloads/stats/')
+    data = freebox.api('downloads/stats/')
 
     # When combining upload+download on the same graph, download should be negative
     print('tx_rate.value {}'.format(data.get(field_tx_rate)))
@@ -299,8 +244,8 @@ def query_transmission_traffic_data():
 
 def query_rrd_data():
     # Load graph info
-    fields = get_fields(mode)
-    db = get_db(fields[0])
+    rrd_fields = get_fields(mode)
+    db = get_db(rrd_fields[0])
 
     # Compute date_start & date_end
     now = datetime.datetime.now()  # math.ceil(time.time())
@@ -310,9 +255,9 @@ def query_rrd_data():
     date_end_timestamp = math.ceil(time.mktime(date_end.timetuple()))
     date_start_timestamp = math.ceil(time.mktime(date_start.timetuple()))
 
-    data = call_api('rrd/', {
+    data = freebox.api('rrd/', {
         'db': db,
-        'fields': fields,
+        'fields': rrd_fields,
         'date_start': date_start_timestamp,
         'date_end': date_end_timestamp
     })['data']
@@ -321,7 +266,7 @@ def query_rrd_data():
     sums = {}
     for timed_data in data:
         for key, value in timed_data.items():
-            if key not in fields:  # Ignore "time" and other unused values
+            if key not in rrd_fields:  # Ignore "time" and other unused values
                 continue
 
             if key not in sums.keys():
@@ -353,6 +298,18 @@ def query_rrd_data():
     for key, value in sums.items():
         print('{}.value {}'.format(key, value))
 
+
+# Freebox authorization
+if args.arg == 'authorize':
+    api_authorize()
+
+# Mode, determined by symlink name
+mode = args.mode
+
+if mode not in modes:
+    print('Unknown mode {}'.format(mode))
+    print('Accepted modes are {}'.format(', '.join(modes)))
+    sys.exit(1)
 
 freebox = get_freebox()
 if freebox is None:
