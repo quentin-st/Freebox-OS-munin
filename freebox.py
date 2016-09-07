@@ -1,11 +1,10 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-
 import os
 import json
 import sys
 import requests
 import socket
+
+from util import *
 
 freebox_config_file = os.path.join(os.path.dirname(__file__), 'freebox.json')
 app_id = 'freebox-revolution-munin'  # Script legacy name. Changing this would break authentication
@@ -77,7 +76,31 @@ class Freebox:
         return r_json['result']
 
     def api_get_connected_disks(self):
-        return self.api('storage/disk/')
+        disks = self.api('storage/disk/')
+
+        # Define a display name for each disk
+        for disk in disks:
+            name = disk.get('model')
+
+            # Disk does not provide its model, and has exactly one partition:
+            if len(name) == 0 and len(disk.get('partitions')) == 1:
+                name = disk.get('partitions')[0].get('label')
+
+            # Could not determine name from partition, try to use serial
+            if len(name) == 0:
+                name = disk.get('serial')
+
+            # In last resort, use disk id
+            if len(name) == 0:
+                name = disk.get('id')
+
+            slug = slugify(name)
+            name += ' ({})'.format(disk.get('type'))
+
+            disk['slug'] = slug
+            disk['display_name'] = name
+
+        return disks
 
 
 def api_authorize():

@@ -20,12 +20,12 @@ import sys
 import datetime
 import time
 import math
-import re
 
 from db import *
 from fields import *
 from freebox import app_version, api_authorize, get_freebox
 from modes import *
+from util import *
 
 ###############
 # Configuration
@@ -48,11 +48,6 @@ parser = argparse.ArgumentParser()
 parser.add_argument('arg', nargs='?')
 parser.add_argument('--mode', default=__file__.split('/')[-1])  # Mode, determined by symlink name
 args = parser.parse_args()
-
-
-# From https://github.com/yhat/rodeo/issues/90#issuecomment-98790197
-def slugify(text):
-    return re.sub(r'[-\s]+', '_', (re.sub(r'[^\w\s-]', '', text).strip().lower()))
 
 
 def print_config():
@@ -146,10 +141,8 @@ def print_config():
 
         disks = freebox.api_get_connected_disks()
         for disk in disks:
-            name = disk.get('model')
-            slug = slugify(name)
-
-            name += " (" + disk.get('type') + ")"
+            name = disk.get('display_name')
+            slug = disk.get('slug')
 
             print('{}.min 0'.format(slug))
             print('{}.max 1'.format(slug))
@@ -219,8 +212,7 @@ def query_storagespin_data():
     disks = freebox.api_get_connected_disks()
 
     for disk in disks:
-        slug = slugify(disk.get('model'))
-
+        slug = disk.get('slug')
         state = disk.get('spinning')
 
         if state is True:
