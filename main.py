@@ -125,7 +125,7 @@ def print_config():
         print('graph_args --lower-limit 0 --upper-limit 100')
         print('graph_vlabel %')
 
-        disks = freebox.get_connected_disks()
+        disks = freebox.api_get_connected_disks()
         for disk in disks:
             for partition in disk.get('partitions'):
                 name = partition.get('label')
@@ -144,7 +144,7 @@ def print_config():
         print('graph_args --lower-limit 0 --upper-limit 1')
         print('graph_vlabel Disk state (active/sleep)')
 
-        disks = freebox.get_connected_disks()
+        disks = freebox.api_get_connected_disks()
         for disk in disks:
             name = disk.get('model')
             slug = slugify(name)
@@ -187,7 +187,7 @@ def print_config():
 
 
 def query_storage_data():
-    disks = freebox.get_connected_disks()
+    disks = freebox.api_get_connected_disks()
 
     for disk in disks:
         for partition in disk.get('partitions'):
@@ -201,7 +201,7 @@ def query_storage_data():
 
 
 def query_storagespin_data():
-    disks = freebox.get_connected_disks()
+    disks = freebox.api_get_connected_disks()
 
     for disk in disks:
         slug = slugify(disk.get('model'))
