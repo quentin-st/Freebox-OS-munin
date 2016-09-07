@@ -58,7 +58,7 @@ class Freebox:
             if r_json['error_code'] == 'auth_required':
                 # Open session and try again
                 api_open_session(self)
-                return self.api(uri, params)
+                return self.api(endpoint, params)
             else:
                 # Unknown error (http://dev.freebox.fr/sdk/os/login/#authentication-errors)
                 message = 'Unknown API error "{}" on URI {} (endpoint {})'.format(
