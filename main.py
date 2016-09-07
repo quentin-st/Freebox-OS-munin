@@ -221,10 +221,17 @@ def call_api(endpoint, params=None):
             return call_api(uri, params)
         else:
             # Unknown error (http://dev.freebox.fr/sdk/os/login/#authentication-errors)
-            print('Unknown RRD API error "{}": {}'.format(
+            message = 'Unknown API error "{}" on URI {} (endpoint {})'.format(
                 r_json['error_code'],
-                r_json['msg']
-            ))
+                uri,
+                endpoint
+            )
+            try:
+                print('{}: {}'.format(message, r_json['msg']))
+            except UnicodeEncodeError:
+                print('{}. Plus, we could not print the error message correctly.'.format(
+                    message
+                ))
             sys.exit(1)
 
     return r_json['result']
