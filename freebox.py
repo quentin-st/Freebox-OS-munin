@@ -159,7 +159,7 @@ def encode_app_token(app_token, challenge):
     import hashlib
     import hmac
 
-    return hmac.new(str.encode(app_token), str.encode(challenge), hashlib.sha1).hexdigest()
+    return hmac.new(app_token.encode('utf-8'), challenge.encode('utf-8'), hashlib.sha1).hexdigest()
 
 
 def api_open_session(freebox):

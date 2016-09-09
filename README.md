@@ -1,14 +1,14 @@
 # Freebox-OS-munin
 *Freebox Revolution & Freebox 4K's stats monitoring using munin*
 
-See [below](#graphs) for some screenshots
+This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for some screenshots
 
 ## Usage
 
-1. This plugin relies on `requests`:
+1. This plugin relies on `requests`: (replace `pip` with the version you use)
 
     ```bash
-    pip3 install requests
+    pip install requests
     ```
 
 2. Clone this project on your server:
