@@ -90,9 +90,9 @@ See [below](#graphs) for some screenshots
 - freebox-hddspin
     ![freebox-hddspin](doc/freebox_hddspin-day.png)
 - freebox-transmission-tasks
-    *(missing screenshot)*
+    ![freebox-hddspin](doc/freebox_transmission_tasks-day.png)
 - freebox-transmission-traffic
-    *(missing screenshot)*
+    ![freebox-hddspin](doc/freebox_transmission_traffic-day.png)
 
 ## Contribute
 Fork this repository, and submit pull requests upon master branch.
