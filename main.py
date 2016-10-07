@@ -258,7 +258,7 @@ def query_rrd_data():
     now = datetime.datetime.now()  # math.ceil(time.time())
     now = now.replace(second=0, microsecond=0)
     date_end = now.replace(minute=now.minute - now.minute % 5)  # Round to lowest 5 minutes
-    date_start = now - datetime.timedelta(minutes=5)  # Remove 5 minutes from date_end
+    date_start = date_end - datetime.timedelta(minutes=5)  # Remove 5 minutes from date_end
     date_end_timestamp = math.ceil(time.mktime(date_end.timetuple()))
     date_start_timestamp = math.ceil(time.mktime(date_start.timetuple()))
 
