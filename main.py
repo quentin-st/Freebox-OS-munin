@@ -5,6 +5,7 @@
  Freebox Revolution & Freebox 4K are supported for the following stats:
  - traffic,
  - temp,
+ - fan_speed,
  - xdsl,
  - xdsl_errors,
  - switch1,
@@ -87,6 +88,11 @@ def print_config():
         print('hdd.colour 4DA74D')
         print('hdd.warning 55')
         print('hdd.critical 65')
+    elif mode == mode_fan_speed:
+        print('graph_title Freebox fan speed')
+        print('graph_vlabel rpm')
+        print('speed.label RPM')
+        print('speed.colour 50A850')
     elif mode == mode_xdsl:
         print('graph_title xDSL')
         print('graph_vlabel xDSL noise margin (dB)')

@@ -12,6 +12,9 @@ field_cpub = 'cpub'
 field_sw = 'sw'
 field_hdd = 'hdd'
 
+# mode_fan_speed
+field_fan_speed = 'fan_speed'
+
 # mode_xdsl
 field_snr_down = 'snr_down'
 field_snr_up = 'snr_up'
@@ -68,6 +71,9 @@ fields = {
         field_cpub,
         field_sw,
         field_hdd
+    ],
+    mode_fan_speed: [
+        field_fan_speed
     ],
     mode_xdsl: [
         field_snr_down,
@@ -126,7 +132,7 @@ xdsl_errors_fields_descriptions = {
 
 
 def get_fields(mode):
-    if mode not in modes:
+    if mode not in fields:
         print('Unknown mode {}'.format(mode))
 
     return fields[mode]

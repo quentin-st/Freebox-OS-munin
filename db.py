@@ -15,6 +15,8 @@ dbs = {
     field_cpub: db_temp,
     field_sw: db_temp,
     field_hdd: db_temp,
+
+    field_fan_speed: db_temp,
     
     field_snr_down: db_dsl,
     field_snr_up: db_dsl,

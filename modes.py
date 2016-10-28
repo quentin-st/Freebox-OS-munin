@@ -1,6 +1,7 @@
 # These are the launch modes of the app
 mode_traffic = 'freebox-traffic'
 mode_temp = 'freebox-temp'
+mode_fan_speed = 'freebox-fan-speed'
 mode_xdsl = 'freebox-xdsl'
 mode_xdsl_errors = 'freebox-xdsl-errors'
 mode_switch1 = 'freebox-switch1'
@@ -15,6 +16,7 @@ mode_transmission_traffic = 'freebox-transmission-traffic'
 modes = [
     mode_traffic,
     mode_temp,
+    mode_fan_speed,
     mode_xdsl,
     mode_xdsl_errors,
     mode_switch1,
