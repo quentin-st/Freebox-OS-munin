@@ -37,6 +37,7 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
     ```bash
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-traffic
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-temp
+    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-fan-speed
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-xdsl
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-xdsl-errors
     ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-switch1
@@ -61,7 +62,7 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
    [freebox*]
    user root
    ```
-   > Tip: You can replace `root` by the authorization file owner
+   > Tip: You can replace `root` with the authorization file owner
 
    Restart munin node service
    ```bash
@@ -74,29 +75,31 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
     munin-run freebox-traffic
     ```
 
-## Graphs
-- freebox-traffic
-    ![freebox-traffic](doc/freebox_traffic-day.png)
-- freebox-xdsl
-    ![freebox-xdsl](doc/freebox_xdsl-day.png)
-- freebox-xdsl-errors
-    ![freebox-xdsl-errors](doc/freebox_xdsl_errors-day.png)
-- freebox-temp
-    ![freebox-temp](doc/freebox_temp-day.png)
-- freebox-switch1 (1..4)
-    ![freebox-switch1)](doc/freebox_switch1-day.png)
-- freebox-df
-    ![freebox-df](doc/freebox_df-day.png)
-- freebox-hddspin
-    ![freebox-hddspin](doc/freebox_hddspin-day.png)
-- freebox-transmission-tasks
-    ![freebox-hddspin](doc/freebox_transmission_tasks-day.png)
-- freebox-transmission-traffic
-    ![freebox-hddspin](doc/freebox_transmission_traffic-day.png)
-
 ## Contribute
 Fork this repository, and submit pull requests upon master branch.
 
 > Tip: when making changes that affects all plugins, you can tests them all
 by running `./main.py --mode all`. This will execute each plugin in both config
 & poll modes.
+
+## Graphs
+- freebox-traffic  
+    ![freebox-traffic](doc/freebox_traffic-day.png)
+- freebox-xdsl  
+    ![freebox-xdsl](doc/freebox_xdsl-day.png)
+- freebox-xdsl-errors  
+    ![freebox-xdsl-errors](doc/freebox_xdsl_errors-day.png)
+- freebox-temp  
+    ![freebox-temp](doc/freebox_temp-day.png)
+- freebox-fan-speed  
+    ![freebox-temp](doc/freebox_fan_speed-day.png)
+- freebox-switch1 (1..4)  
+    ![freebox-switch1)](doc/freebox_switch1-day.png)
+- freebox-df  
+    ![freebox-df](doc/freebox_df-day.png)
+- freebox-hddspin  
+    ![freebox-hddspin](doc/freebox_hddspin-day.png)
+- freebox-transmission-tasks  
+    ![freebox-hddspin](doc/freebox_transmission_tasks-day.png)
+- freebox-transmission-traffic  
+    ![freebox-hddspin](doc/freebox_transmission_traffic-day.png)
