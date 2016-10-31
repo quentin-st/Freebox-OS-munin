@@ -93,6 +93,7 @@ def print_config():
         print('graph_vlabel rpm')
         print('fan_speed.label Internal fan speed')
         print('fan_speed.colour 50A850')
+        print('fan_speed.critical 1:')
     elif mode == mode_xdsl:
         print('graph_title xDSL')
         print('graph_vlabel xDSL noise margin (dB)')
