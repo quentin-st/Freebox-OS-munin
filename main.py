@@ -5,9 +5,9 @@
  Freebox Revolution & Freebox 4K are supported for the following stats:
  - traffic,
  - temp,
- - fan_speed,
+ - fan-speed,
  - xdsl,
- - xdsl_errors,
+ - xdsl-errors,
  - switch1,
  - switch2,
  - switch3,
