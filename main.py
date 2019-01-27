@@ -13,8 +13,8 @@
  - switch3,
  - switch4,
  - df
- - transmission_tasks
- - transmission_traffic """
+ - transmission-tasks
+ - transmission-traffic """
 
 import argparse
 import sys
