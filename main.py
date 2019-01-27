@@ -6,6 +6,7 @@
  - traffic,
  - temp,
  - fan-speed,
+ - hddspin,
  - xdsl,
  - xdsl-errors,
  - switch1,
