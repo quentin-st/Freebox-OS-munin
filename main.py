@@ -5,16 +5,17 @@
  Freebox Revolution & Freebox 4K are supported for the following stats:
  - traffic,
  - temp,
- - fan_speed,
+ - fan-speed,
+ - hddspin,
  - xdsl,
- - xdsl_errors,
+ - xdsl-errors,
  - switch1,
  - switch2,
  - switch3,
  - switch4,
  - df
- - transmission_tasks
- - transmission_traffic """
+ - transmission-tasks
+ - transmission-traffic """
 
 import argparse
 import sys
