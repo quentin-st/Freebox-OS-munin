@@ -12,6 +12,7 @@ mode_df = 'freebox-df'
 mode_hddspin = 'freebox-hddspin'
 mode_transmission_tasks = 'freebox-transmission-tasks'
 mode_transmission_traffic = 'freebox-transmission-traffic'
+mode_connection = 'freebox-connection'
 
 modes = [
     mode_traffic,
@@ -26,5 +27,6 @@ modes = [
     mode_df,
     mode_hddspin,
     mode_transmission_tasks,
-    mode_transmission_traffic
+    mode_transmission_traffic,
+    mode_connection
 ]

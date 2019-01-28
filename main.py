@@ -185,6 +185,15 @@ def print_config():
         print('rx_throttling.label Down throttling (byte/s)')
         print('rx_throttling.draw LINE')
         print('rx_throttling.colour 407DB5')
+    elif mode == mode_connection:
+        print('graph_scale yes')
+        print('graph_title bytes up/down')
+        print('graph_vlabel bytes')
+        print('bytes_up.label bytes up')
+        print('bytes_up.type COUNTER')
+        print('bytes_down.label bytes down')
+        print('bytes_down.type COUNTER')
+
 
 
 def query_data():
@@ -198,6 +207,8 @@ def query_data():
         query_transmission_tasks_data()
     elif mode == mode_transmission_traffic:
         query_transmission_traffic_data()
+    elif mode == mode_connection:
+        query_connection()
     else:
         query_rrd_data()
 
@@ -242,6 +253,13 @@ def query_xdsl_errors():
 
 def query_transmission_tasks_data():
     data = freebox.api('downloads/stats/')
+
+    for field in get_fields(mode):
+        print('{}.value {}'.format(field, data.get(field)))
+
+
+def query_connection():
+    data = freebox.api('connection/')
 
     for field in get_fields(mode):
         print('{}.value {}'.format(field, data.get(field)))
