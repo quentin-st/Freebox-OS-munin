@@ -27,7 +27,8 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
 4. Update permissions on authorization file
 
     ```bash
-    chmod 0600 ./freebox.json
+    chmod 0660 ./freebox.json
+    sudo chgrp munin freebox.json
     ```
 
 5. Install the plugins
@@ -52,19 +53,7 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
     service munin-node restart
     ```
 
-6. Add plugin configuration to `/etc/munin/plugin-conf.d/munin-node`
-   ```bash
-   sudo nano /etc/munin/plugin-conf.d/munin-node
-   ```
-
-   Insert the following lines at the end
-   ```bash
-   [freebox*]
-   user root
-   ```
-   > Tip: You can replace `root` with the authorization file owner
-
-   Restart munin node service
+6. Restart munin node service
    ```bash
    sudo service munin-node restart
    ```
