@@ -36,19 +36,9 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
     > Tip: you don't have to symlink each mode. Skip some if you don't need all information
 
     ```bash
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-traffic
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-temp
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-fan-speed
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-xdsl
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-xdsl-errors
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-switch1
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-switch2
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-switch3
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-switch4
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-df
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-hddspin
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-transmission-tasks
-    ln -s "$clone_path"/main.py /etc/munin/plugins/freebox-transmission-traffic
+    ./create_symlinks.py
+    cd /etc/munin/plugins
+    ln -s "$clone_path"/freebox-*
     
     service munin-node restart
     ```
