@@ -63,6 +63,13 @@ field_tx_rate = 'tx_rate'
 field_bytes_up = 'bytes_up'
 field_bytes_down = 'bytes_down'
 
+# mode ftth
+field_has_sfp = 'has_sfp'
+field_link = 'link'
+field_sfp_alim_ok = 'sfp_alim_ok'
+field_sfp_has_signal = 'sfp_has_signal'
+field_sfp_present = 'sfp_present'
+
 fields = {
     mode_traffic: [
         field_rate_down,
@@ -127,7 +134,14 @@ fields = {
     mode_connection: [
         field_bytes_up,
         field_bytes_down,
-    ]
+    ],
+    mode_ftth: [
+        field_has_sfp,
+        field_link,
+        field_sfp_alim_ok,
+        field_sfp_has_signal,
+        field_sfp_present,
+    ],
 }
 
 xdsl_errors_fields_descriptions = {

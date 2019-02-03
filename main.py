@@ -195,6 +195,15 @@ def print_config():
         print('bytes_up.label bytes/s')
         print('bytes_up.type COUNTER')
         print('bytes_up.negative bytes_down')
+    elif mode == mode_ftth:
+        print('graph_title FTTH status')
+        print('graph_args --lower-limit 0 --upper-limit 1')
+        print('graph_vlabel Status')
+        for field in get_fields(mode):
+            print('{}.min 0'.format(field))
+            print('{}.max 1'.format(field))
+            print('{}.label {}'.format(field, field))
+            print('{}.draw AREASTACK'.format(field))
 
 
 
@@ -211,6 +220,8 @@ def query_data():
         query_transmission_traffic_data()
     elif mode == mode_connection:
         query_connection()
+    elif mode == mode_ftth:
+        query_ftth()
     else:
         query_rrd_data()
 
@@ -258,6 +269,17 @@ def query_transmission_tasks_data():
 
     for field in get_fields(mode):
         print('{}.value {}'.format(field, data.get(field)))
+
+
+def query_ftth():
+    data = freebox.api('connection/ftth/')
+
+    for field in get_fields(mode):
+        if data.get(field):
+            value = 1
+        else:
+            value = 0
+        print('{}.value {}'.format(field, value))
 
 
 def query_connection():
