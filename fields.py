@@ -60,8 +60,8 @@ field_rx_rate = 'rx_rate'
 field_tx_rate = 'tx_rate'
 
 # mode connection
-bytes_up = 'bytes_up'
-bytes_down = 'bytes_down'
+field_bytes_up = 'bytes_up'
+field_bytes_down = 'bytes_down'
 
 fields = {
     mode_traffic: [
@@ -125,8 +125,8 @@ fields = {
         field_tx_rate,
     ],
     mode_connection: [
-        bytes_up,
-        bytes_down,
+        field_bytes_up,
+        field_bytes_down,
     ]
 }
 
