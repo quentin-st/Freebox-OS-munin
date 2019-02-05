@@ -59,6 +59,10 @@ field_tx_throttling = 'throttling_rate.tx_rate'
 field_rx_rate = 'rx_rate'
 field_tx_rate = 'tx_rate'
 
+# mode connection
+field_bytes_up = 'bytes_up'
+field_bytes_down = 'bytes_down'
+
 fields = {
     mode_traffic: [
         field_rate_down,
@@ -119,6 +123,10 @@ fields = {
         field_tx_throttling,
         field_rx_rate,
         field_tx_rate,
+    ],
+    mode_connection: [
+        field_bytes_up,
+        field_bytes_down,
     ]
 }
 

@@ -82,3 +82,5 @@ by running `./main.py --mode all`. This will execute each plugin in both config
     ![freebox-hddspin](doc/freebox_transmission_tasks-day.png)
 - freebox-transmission-traffic  
     ![freebox-hddspin](doc/freebox_transmission_traffic-day.png)
+- freebox-connection
+    ![freebox-connection](doc/freebox_connection.png)
