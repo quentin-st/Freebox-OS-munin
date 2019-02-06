@@ -188,11 +188,13 @@ def print_config():
     elif mode == mode_connection:
         print('graph_scale yes')
         print('graph_title bytes up/down')
-        print('graph_vlabel bytes')
-        print('bytes_up.label bytes up')
-        print('bytes_up.type COUNTER')
-        print('bytes_down.label bytes down')
+        print('graph_vlabel bytes in (-) / out (+) per second')
         print('bytes_down.type COUNTER')
+        print('bytes_down.label bytes/s')
+        print('bytes_down.graph no')
+        print('bytes_up.label bytes/s')
+        print('bytes_up.type COUNTER')
+        print('bytes_up.negative bytes_down')
 
 
 
