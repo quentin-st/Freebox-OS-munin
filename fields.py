@@ -70,6 +70,18 @@ field_sfp_alim_ok = 'sfp_alim_ok'
 field_sfp_has_signal = 'sfp_has_signal'
 field_sfp_present = 'sfp_present'
 
+# mode switch-bytes
+field_rx_bytes = 'rx_good_bytes'
+field_tx_bytes = 'tx_bytes'
+
+# mode switch-packets
+field_rx_packets = 'rx_good_packets'
+field_tx_packets = 'tx_packets'
+field_rx_unicast_packets = 'rx_unicast_packets'
+field_tx_unicast_packets = 'tx_unicast_packets'
+field_rx_broadcast_packets = 'rx_broadcast_packets'
+field_tx_broadcast_packets = 'tx_broadcast_packets'
+
 fields = {
     mode_traffic: [
         field_rate_down,
@@ -112,6 +124,18 @@ fields = {
     mode_switch4: [
         field_rx4,
         field_tx4
+    ],
+    mode_switch_bytes: [
+        field_rx_bytes,
+        field_tx_bytes,
+    ],
+    mode_switch_packets: [
+        field_rx_packets,
+        field_tx_packets,
+        field_rx_unicast_packets,
+        field_tx_unicast_packets,
+        field_rx_broadcast_packets,
+        field_tx_broadcast_packets,
     ],
     mode_transmission_tasks: [
         field_nb_tasks_stopped,
