@@ -1,9 +1,9 @@
 # Freebox-OS-munin
-*Freebox Revolution & Freebox 4K's stats monitoring using munin*
+*Freebox Revolution & Freebox Mini 4K stats monitoring using munin*
 
 This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for some screenshots
 
-## Usage
+## Usage
 
 1. This plugin relies on `requests`: (replace `pip` with the version you use)
 
@@ -14,8 +14,8 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
 2. Clone this project on your server:
     
     ```bash
-    git clone https://github.com/chteuchteu/Freebox-OS-munin.git && cd Freebox-OS-munin
-    clone_path=$(pwd)
+    git clone https://github.com/chteuchteu/Freebox-OS-munin.git
+    cd Freebox-OS-munin
     ```
 
 3. Launch authorization script
@@ -27,7 +27,7 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
 4. Update permissions on authorization file
 
     ```bash
-    chmod 0660 ./freebox.json
+    chmod 0660 freebox.json
     sudo chgrp munin freebox.json
     ```
 
@@ -37,10 +37,7 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
 
     ```bash
     ./create_symlinks.py
-    cd /etc/munin/plugins
-    ln -s "$clone_path"/freebox-*
-    
-    service munin-node restart
+    sudo ln -sf $(pwd)/freebox-* /etc/munin/plugins
     ```
 
 6. Restart munin node service
@@ -51,7 +48,7 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
 7. Test it
 
     ```
-    munin-run freebox-traffic
+    sudo munin-run freebox-traffic
     ```
 
 ## Contribute
@@ -82,7 +79,7 @@ by running `./main.py --mode all`. This will execute each plugin in both config
     ![freebox-hddspin](doc/freebox_transmission_tasks-day.png)
 - freebox-transmission-traffic  
     ![freebox-hddspin](doc/freebox_transmission_traffic-day.png)
-- freebox-connection
+- freebox-connection  
     ![freebox-connection](doc/freebox_connection.png)
-- freebox-ftth
+- freebox-ftth  
     ![freebox-ftth](doc/freebox_ftth.png)
