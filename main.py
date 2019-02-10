@@ -195,6 +195,15 @@ def print_config():
         print('bytes_up.label bytes/s')
         print('bytes_up.type COUNTER')
         print('bytes_up.negative bytes_down')
+    elif mode == mode_connection_log:
+        print('graph_scale yes')
+        print('graph_title bytes up/down')
+        print('graph_vlabel bytes per second')
+        print('graph_args --logarithmic')
+        print('bytes_down.type COUNTER')
+        print('bytes_down.label down (bytes/s)')
+        print('bytes_up.type COUNTER')
+        print('bytes_up.label up (bytes/s)')
     elif mode == mode_ftth:
         print('graph_title FTTH status')
         print('graph_args --lower-limit 0 --upper-limit 1')
@@ -218,7 +227,7 @@ def query_data():
         query_transmission_tasks_data()
     elif mode == mode_transmission_traffic:
         query_transmission_traffic_data()
-    elif mode == mode_connection:
+    elif mode in [mode_connection, mode_connection_log]:
         query_connection()
     elif mode == mode_ftth:
         query_ftth()
