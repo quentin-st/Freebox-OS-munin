@@ -380,9 +380,17 @@ if args.arg == 'config':
 
 # Great for testing
 if mode == 'all':
+    COLORS = {
+            'blue': '\033[34m',
+            'red': '\033[31m',
+            'normal': '\033[0m',
+             }
     for m in modes:
         mode = m
+        print(COLORS['red'] + "Testing mode:", mode)
+        print(COLORS['blue'] + "config:" + COLORS['normal'])
         print_config()
+        print(COLORS['blue'] + "data:" + COLORS['normal'])
         query_data()
 
     sys.exit(0)

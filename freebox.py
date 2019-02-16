@@ -73,7 +73,7 @@ class Freebox:
                     ))
                 sys.exit(1)
 
-        return r_json['result']
+        return r_json.get('result', '')
 
     def api_get_connected_disks(self):
         disks = self.api('storage/disk/')
