@@ -1,3 +1,5 @@
 .idea/
 freebox.json
 __pycache__/
+freebox-*
+*.pyc
