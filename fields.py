@@ -135,6 +135,10 @@ fields = {
         field_bytes_up,
         field_bytes_down,
     ],
+    mode_connection_log: [
+        field_bytes_up,
+        field_bytes_down,
+    ],
     mode_ftth: [
         field_has_sfp,
         field_link,
