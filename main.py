@@ -113,6 +113,34 @@ def print_config():
                 print('{}.label {}'.format(field_slug, kind.title() + ' ' + xdsl_errors_fields_descriptions.get(field)))
                 print('{}.min 0'.format(field_slug))
                 print('{}.draw LINE'.format(field_slug))
+    elif mode.startswith('freebox-switch-bytes'):
+        switch_index = mode[-1]
+        print('graph_title Switch port #{} traffic'.format(switch_index))
+        print('graph_scale yes')
+        print('graph_vlabel bytes per second')
+        print('graph_args --logarithmic')
+        print('rx_good_bytes.label rx')
+        print('rx_good_bytes.type COUNTER')
+        print('tx_bytes.label tx')
+        print('tx_bytes.type COUNTER')
+    elif mode.startswith('freebox-switch-packets'):
+        switch_index = mode[-1]
+        print('graph_title Switch port #{} traffic'.format(switch_index))
+        print('graph_scale yes')
+        print('graph_vlabel packets per second')
+        print('graph_args --logarithmic')
+        print('rx_good_packets.label rx')
+        print('rx_good_packets.type COUNTER')
+        print('tx_packets.label tx')
+        print('tx_packets.type COUNTER')
+        print('rx_unicast_packets.label rx unicast')
+        print('rx_unicast_packets.type COUNTER')
+        print('tx_unicast_packets.label tx unicast')
+        print('tx_unicast_packets.type COUNTER')
+        print('rx_broadcast_packets.label rx broadcast')
+        print('rx_broadcast_packets.type COUNTER')
+        print('tx_broadcast_packets.label tx broadcast')
+        print('tx_broadcast_packets.type COUNTER')
     elif mode.startswith('freebox-switch'):
         switch_index = mode[-1]
         print('graph_title Switch port #{} traffic'.format(switch_index))
@@ -231,6 +259,10 @@ def query_data():
         query_connection()
     elif mode == mode_ftth:
         query_ftth()
+    elif mode.startswith('freebox-switch-'):
+        switch_index = mode[-1]
+        mode2 = mode[:-1]
+        query_switch(switch_index, mode2)
     else:
         query_rrd_data()
 
@@ -293,6 +325,13 @@ def query_ftth():
 
 def query_connection():
     data = freebox.api('connection/')
+
+    for field in get_fields(mode):
+        print('{}.value {}'.format(field, data.get(field)))
+
+
+def query_switch(interface, mode):
+    data = freebox.api('switch/port/{}/stats'.format(interface))
 
     for field in get_fields(mode):
         print('{}.value {}'.format(field, data.get(field)))

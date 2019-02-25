@@ -71,6 +71,10 @@ by running `./main.py --mode all`. This will execute each plugin in both config
     ![freebox-temp](doc/freebox_fan_speed-day.png)
 - freebox-switch1 (1..4)  
     ![freebox-switch1)](doc/freebox_switch1-day.png)
+- freebox-switch-bytes1 (1..4)  
+    ![freebox-switch1)](doc/freebox_switch_bytes1-day.png)
+- freebox-switch-packets1 (1..4)  
+    ![freebox-switch1)](doc/freebox_switch_packets1-day.png)
 - freebox-df  
     ![freebox-df](doc/freebox_df-day.png)
 - freebox-hddspin  
