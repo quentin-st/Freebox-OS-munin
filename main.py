@@ -17,6 +17,8 @@
  - transmission-tasks
  - transmission-traffic """
 
+import os
+import json
 import argparse
 import sys
 import datetime
@@ -241,7 +243,34 @@ def print_config():
             print('{}.max 1'.format(field))
             print('{}.label {}'.format(field, field))
             print('{}.draw AREASTACK'.format(field))
-
+    elif mode == mode_wifi_stations:
+        print('graph_title Wifi stations')
+        print('graph_vlabel #')
+        print('graph_total Total')
+        print('graph_args --lower-limit 0')
+        stations = get_wifi_stations()
+        for station in stations:
+            print('{}.label {}'.format(station, station))
+            print('{}.draw AREASTACK'.format(station))
+    elif mode == mode_wifi_bytes:
+        print('graph_title Wifi bytes up/down')
+        print('graph_scale yes')
+        print('graph_vlabel byte in (-) / out (+) per second')
+        print('rx_bytes.type COUNTER')
+        print('rx_bytes.label bytes/s')
+        print('rx_bytes.graph no')
+        print('tx_bytes.label bytes/s')
+        print('tx_bytes.type COUNTER')
+        print('tx_bytes.negative rx_bytes')
+    elif mode == mode_wifi_bytes_log:
+        print('graph_title Wifi bytes up/down')
+        print('graph_scale yes')
+        print('graph_vlabel bytes per second')
+        print('graph_args --logarithmic')
+        print('rx_bytes.type COUNTER')
+        print('rx_bytes.label down (bytes/s)')
+        print('tx_bytes.type COUNTER')
+        print('tx_bytes.label up (bytes/s)')
 
 
 def query_data():
@@ -263,6 +292,10 @@ def query_data():
         switch_index = mode[-1]
         mode2 = mode[:-1]
         query_switch(switch_index, mode2)
+    elif mode == mode_wifi_stations:
+        query_wifi_stations()
+    elif mode in [mode_wifi_bytes, mode_wifi_bytes_log]:
+        query_wifi_bytes()
     else:
         query_rrd_data()
 
@@ -321,6 +354,63 @@ def query_ftth():
         else:
             value = 0
         print('{}.value {}'.format(field, value))
+
+
+def get_wifi_stations():
+    data = freebox.api('wifi/ap/0/stations/')
+
+    # the filename is something like
+    # /var/lib/munin-node/plugin-state/nobody/freebox-wifi-stations-
+    wifi_filename = os.getenv('MUNIN_STATEFILE')
+    try:
+        with open(wifi_filename) as f:
+            stations = json.load(f)
+    except FileNotFoundError:
+        stations = dict()
+
+    current_time = time.time()
+    # refresh current stations
+    for station in data:
+        hostname = station['hostname']
+        stations[hostname] = current_time
+
+    # remove old stations (not seen since one year)
+    to_remove = list()
+    for station in stations:
+        if current_time - stations[station] > 365 * 24 * 60 * 60:
+            to_remove.append(station)
+    for station in to_remove:
+        del stations[station]
+
+    # update JSON file
+    with open(wifi_filename, "w") as f:
+        json.dump(stations, f)
+
+    return stations
+
+def query_wifi_stations():
+    stations = get_wifi_stations()
+
+    current_time = time.time()
+    for station in stations:
+        # seen in the lastest 5 minutes?
+        if current_time - stations[station] < 5 * 60:
+            value = 1
+        else:
+            value = 0
+        print('{}.value {}'.format(station, value))
+
+def query_wifi_bytes():
+    data = freebox.api('wifi/ap/0/stations/')
+
+    fields = dict()
+    for field in get_fields(mode):
+        fields[field] = 0
+    for station in data:
+        for field in get_fields(mode):
+            fields[field] += station[field]
+    for field in get_fields(mode):
+        print('{}.value {}'.format(field, fields[field]))
 
 
 def query_connection():

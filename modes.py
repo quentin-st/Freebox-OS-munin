@@ -17,6 +17,9 @@ mode_transmission_traffic = 'freebox-transmission-traffic'
 mode_connection = 'freebox-connection'
 mode_connection_log = 'freebox-connection-log'
 mode_ftth = 'freebox-ftth'
+mode_wifi_stations = 'freebox-wifi-stations'
+mode_wifi_bytes = 'freebox-wifi-bytes'
+mode_wifi_bytes_log = 'freebox-wifi-bytes-log'
 
 modes = [
     mode_traffic,
@@ -43,4 +46,7 @@ modes = [
     mode_connection,
     mode_connection_log,
     mode_ftth,
+    mode_wifi_stations,
+    mode_wifi_bytes,
+    mode_wifi_bytes_log,
 ]
