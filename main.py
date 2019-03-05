@@ -143,6 +143,16 @@ def print_config():
         print('rx_broadcast_packets.type COUNTER')
         print('tx_broadcast_packets.label tx broadcast')
         print('tx_broadcast_packets.type COUNTER')
+    elif mode.startswith('freebox-switch-stations'):
+        switch_index = mode[-1]
+        print('graph_title Switch port #{} stations'.format(switch_index))
+        print('graph_vlabel #')
+        print('graph_total Total')
+        print('graph_args --lower-limit 0')
+        stations = get_switch_stations(switch_index)
+        for station in stations:
+            print('{}.label {}'.format(station, stations[station]['hostname']))
+            print('{}.draw AREASTACK'.format(station))
     elif mode.startswith('freebox-switch'):
         switch_index = mode[-1]
         print('graph_title Switch port #{} traffic'.format(switch_index))
@@ -288,6 +298,9 @@ def query_data():
         query_connection()
     elif mode == mode_ftth:
         query_ftth()
+    elif mode.startswith('freebox-switch-stations'):
+        switch_index = mode[-1]
+        query_switch_stations(switch_index)
     elif mode.startswith('freebox-switch-'):
         switch_index = mode[-1]
         mode2 = mode[:-1]
@@ -435,6 +448,57 @@ def query_transmission_traffic_data():
     print('tx_throttling.value {}'.format(data.get('throttling_rate').get('tx_rate')))
     print('rx_rate.value {}'.format(-1 * data.get(field_rx_rate)))
     print('rx_throttling.value {}'.format(-1 * data.get('throttling_rate').get('rx_rate')))
+
+
+def get_switch_stations(interface_idx):
+    data = freebox.api('switch/status/')
+
+    # the filename is something like
+    # /var/lib/munin-node/plugin-state/nobody/freebox-switch-stations*
+    switch_filename = os.getenv('MUNIN_STATEFILE')
+    try:
+        with open(switch_filename) as f:
+            stations = json.load(f)
+    except FileNotFoundError:
+        stations = dict()
+
+    current_time = time.time()
+    # refresh current stations
+    for interface in data:
+        if interface['name'][-1] is not interface_idx:
+            continue
+        mac_list = interface.get('mac_list', [])
+        for host in mac_list:
+            key = host['hostname'].strip().replace('.', '_')
+            stations[key] = {'last_seen': current_time,
+                    'hostname': host['hostname']}
+
+    # remove old stations (not seen since one year)
+    to_remove = list()
+    for station in stations:
+        if current_time - stations[station]['last_seen'] > 365 * 24 * 60 * 60:
+            to_remove.append(station)
+    for station in to_remove:
+        del stations[station]
+
+    # update JSON file
+    with open(switch_filename, "w") as f:
+        json.dump(stations, f)
+
+    return stations
+
+
+def query_switch_stations(interface):
+    stations = get_switch_stations(interface)
+
+    current_time = time.time()
+    for station in stations:
+        # seen in the lastest 5 minutes?
+        if current_time - stations[station]['last_seen'] < 5 * 60:
+            value = 1
+        else:
+            value = 0
+        print('{}.value {}'.format(station, value))
 
 
 def query_rrd_data():
