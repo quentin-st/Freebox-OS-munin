@@ -89,3 +89,9 @@ by running `./main.py --mode all`. This will execute each plugin in both config
     ![freebox-connection-log](doc/freebox_connection_log.png)
 - freebox-ftth  
     ![freebox-ftth](doc/freebox_ftth.png)
+- freebox-wifi-bytes  
+	![freebox-wifi-bytes](doc/freebox_wifi_bytes.png)
+- freebox-wifi-bytes-log  
+	![freebox-wifi-bytes](doc/freebox_wifi_bytes_log.png)
+- freebox-wifi-stations  
+	![freebox-wifi-bytes](doc/freebox_wifi_stations.png)
