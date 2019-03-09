@@ -82,6 +82,13 @@ field_tx_unicast_packets = 'tx_unicast_packets'
 field_rx_broadcast_packets = 'rx_broadcast_packets'
 field_tx_broadcast_packets = 'tx_broadcast_packets'
 
+# mode wifi-stations
+field_stations = 'stations'
+
+# mode wifi-bytes
+field_wifi_rx_bytes = 'rx_bytes'
+field_wifi_tx_bytes = 'tx_bytes'
+
 fields = {
     mode_traffic: [
         field_rate_down,
@@ -169,6 +176,17 @@ fields = {
         field_sfp_alim_ok,
         field_sfp_has_signal,
         field_sfp_present,
+    ],
+    mode_wifi_stations: [
+        field_stations,
+    ],
+    mode_wifi_bytes: [
+        field_wifi_rx_bytes,
+        field_wifi_tx_bytes,
+    ],
+    mode_wifi_bytes_log: [
+        field_wifi_rx_bytes,
+        field_wifi_tx_bytes,
     ],
 }
 
