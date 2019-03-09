@@ -374,7 +374,7 @@ def get_wifi_stations():
 
     # the filename is something like
     # /var/lib/munin-node/plugin-state/nobody/freebox-wifi-stations-
-    wifi_filename = os.getenv('MUNIN_STATEFILE')
+    wifi_filename = os.environ.get('MUNIN_STATEFILE', mode + '-STATEFILE')
     try:
         with open(wifi_filename) as f:
             stations = json.load(f)
@@ -455,7 +455,7 @@ def get_switch_stations(interface_idx):
 
     # the filename is something like
     # /var/lib/munin-node/plugin-state/nobody/freebox-switch-stations*
-    switch_filename = os.getenv('MUNIN_STATEFILE')
+    switch_filename = os.environ.get('MUNIN_STATEFILE', mode + '-STATEFILE')
     try:
         with open(switch_filename) as f:
             stations = json.load(f)
