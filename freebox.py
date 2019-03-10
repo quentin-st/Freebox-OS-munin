@@ -34,6 +34,36 @@ class Freebox:
 
         return freebox
 
+    def api_open_session(self):
+        # Retrieve challenge
+        uri = Freebox.get_api_call_uri('login/')
+        r = requests.get(uri)
+        r_json = r.json()
+
+        if not r_json['success']:
+            print('Could not retrieve challenge when opening session: {}'.format(r_json['msg']))
+            sys.exit(1)
+
+        challenge = r_json['result']['challenge']
+        self.session_challenge = challenge
+
+        # Open session
+        uri += 'session/'
+        password = encode_app_token(self.app_token, challenge)
+        r = requests.post(uri, json={
+            'app_id': app_id,
+            'password': password
+        })
+        r_json = r.json()
+
+        if not r_json['success']:
+            print('Could not open session: {}'.format(r_json['msg']))
+            sys.exit(1)
+
+        session_token = r_json['result']['session_token']
+        self.session_token = session_token
+        self.save()
+
     def api(self, endpoint, params=None):
         uri = self.get_api_call_uri(endpoint)
 
@@ -46,7 +76,7 @@ class Freebox:
         if not r_json['success']:
             if r_json['error_code'] == 'auth_required':
                 # Open session and try again
-                api_open_session(self)
+                self.api_open_session()
                 return self.api(endpoint, params)
             else:
                 # Unknown error (http://dev.freebox.fr/sdk/os/login/#authentication-errors)
@@ -150,37 +180,6 @@ def encode_app_token(app_token, challenge):
     import hmac
 
     return hmac.new(app_token.encode('utf-8'), challenge.encode('utf-8'), hashlib.sha1).hexdigest()
-
-
-def api_open_session(freebox):
-    # Retrieve challenge
-    uri = Freebox.get_api_call_uri('login/')
-    r = requests.get(uri)
-    r_json = r.json()
-
-    if not r_json['success']:
-        print('Could not retrieve challenge when opening session: {}'.format(r_json['msg']))
-        sys.exit(1)
-
-    challenge = r_json['result']['challenge']
-    freebox.session_challenge = challenge
-
-    # Open session
-    uri += 'session/'
-    password = encode_app_token(freebox.app_token, challenge)
-    r = requests.post(uri, json={
-        'app_id': app_id,
-        'password': password
-    })
-    r_json = r.json()
-
-    if not r_json['success']:
-        print('Could not open session: {}'.format(r_json['msg']))
-        sys.exit(1)
-
-    session_token = r_json['result']['session_token']
-    freebox.session_token = session_token
-    freebox.save()
 
 
 def get_freebox():
