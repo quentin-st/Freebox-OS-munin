@@ -27,7 +27,7 @@ import math
 
 from db import *
 from fields import *
-from freebox import app_version, api_authorize, get_freebox
+from freebox import app_version, Freebox, FreeboxNoState
 from modes import *
 from util import *
 
@@ -558,9 +558,11 @@ def query_rrd_data():
         print('{}.value {}'.format(key, value))
 
 
+freebox = Freebox()
+
 # Freebox authorization
 if args.arg == 'authorize':
-    exit_code = api_authorize()
+    exit_code = freebox.api_authorize()
     sys.exit(exit_code)
 
 # Mode, determined by symlink name
@@ -571,8 +573,9 @@ if mode not in modes and mode != 'all':
     print('Accepted modes are {}'.format(', '.join(modes)))
     sys.exit(1)
 
-freebox = get_freebox()
-if freebox is None:
+try:
+    freebox.retrieve()
+except FreeboxNoState:
     print('Could not load Freebox from saved state.')
     sys.exit(1)
 
