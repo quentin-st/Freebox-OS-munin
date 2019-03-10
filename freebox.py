@@ -13,6 +13,10 @@ app_version = '1.0.0'
 device_name = socket.gethostname()
 
 
+class FreeboxNoState(Exception):
+    pass
+
+
 class Freebox:
     app_token = None
     session_challenge = None
@@ -26,13 +30,12 @@ class Freebox:
         with open(freebox_config_file, 'w') as fh:
             json.dump(self.__dict__, fh)
 
-    @staticmethod
-    def retrieve():
-        freebox = Freebox()
-        with open(freebox_config_file, 'r') as fh:
-            freebox.__dict__ = json.load(fh)
-
-        return freebox
+    def retrieve(self):
+        try:
+            with open(freebox_config_file, 'r') as fh:
+                self.__dict__ = json.load(fh)
+        except FileNotFoundError as ex:
+            raise FreeboxNoState() from ex
 
     def api_open_session(self):
         # Retrieve challenge
@@ -122,57 +125,55 @@ class Freebox:
 
         return disks
 
+    def api_authorize(self):
+        print('Authorizing...')
+        uri = Freebox.get_api_call_uri('login/authorize/')
+        r = requests.post(uri, json={
+            'app_id': app_id,
+            'app_name': app_name,
+            'app_version': app_version,
+            'device_name': device_name
+        })
 
-def api_authorize():
-    print('Authorizing...')
-    uri = Freebox.get_api_call_uri('login/authorize/')
-    r = requests.post(uri, json={
-        'app_id': app_id,
-        'app_name': app_name,
-        'app_version': app_version,
-        'device_name': device_name
-    })
+        r_json = r.json()
 
-    r_json = r.json()
-
-    if not r_json['success']:
-        print('Error while authenticating: {}'.format(r_json))
-        return 1
-
-    app_token = r_json['result']['app_token']
-    track_id = r_json['result']['track_id']
-
-    # Watch for token status
-    print('Waiting for you to push the "Yes" button on your Freebox')
-
-    challenge = None
-    while True:
-        r2 = requests.get(uri + str(track_id))
-        r2_json = r2.json()
-        status = r2_json['result']['status']
-
-        if status == 'pending':
-            sys.stdout.write('.')
-            sys.stdout.flush()
-        elif status == 'timeout':
-            print('\nAuthorization request timeouted. Re-run this script, but please go faster next time')
+        if not r_json['success']:
+            print('Error while authenticating: {}'.format(r_json))
             return 1
-        elif status == 'denied':
-            print('\nYou denied authorization request.')
-            return 1
-        elif status == 'granted':
-            challenge = r2_json['result']['challenge']
-            break
 
-    freebox = Freebox()
-    freebox.app_token = app_token
-    freebox.session_challenge = challenge
-    freebox.save()
+        app_token = r_json['result']['app_token']
+        track_id = r_json['result']['track_id']
 
-    # That's a success
-    print('\nSuccessfully authenticated script. Exiting.')
+        # Watch for token status
+        print('Waiting for you to push the "Yes" button on your Freebox')
 
-    return 0
+        challenge = None
+        while True:
+            r2 = requests.get(uri + str(track_id))
+            r2_json = r2.json()
+            status = r2_json['result']['status']
+
+            if status == 'pending':
+                sys.stdout.write('.')
+                sys.stdout.flush()
+            elif status == 'timeout':
+                print('\nAuthorization request timeouted. Re-run this script, but please go faster next time')
+                return 1
+            elif status == 'denied':
+                print('\nYou denied authorization request.')
+                return 1
+            elif status == 'granted':
+                challenge = r2_json['result']['challenge']
+                break
+
+        self.app_token = app_token
+        self.session_challenge = challenge
+        self.save()
+
+        # That's a success
+        print('\nSuccessfully authenticated script. Exiting.')
+
+        return 0
 
 
 def encode_app_token(app_token, challenge):
@@ -180,7 +181,3 @@ def encode_app_token(app_token, challenge):
     import hmac
 
     return hmac.new(app_token.encode('utf-8'), challenge.encode('utf-8'), hashlib.sha1).hexdigest()
-
-
-def get_freebox():
-    return Freebox.retrieve()
