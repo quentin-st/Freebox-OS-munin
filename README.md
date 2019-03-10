@@ -69,6 +69,8 @@ by running `./main.py --mode all`. This will execute each plugin in both config
     ![freebox-temp](doc/freebox_temp-day.png)
 - freebox-fan-speed  
     ![freebox-temp](doc/freebox_fan_speed-day.png)
+- freebox-switch-stations1 (1..4)  
+    ![freebox-switch-stations1](doc/freebox_switch_stations.png)
 - freebox-switch1 (1..4)  
     ![freebox-switch1)](doc/freebox_switch1-day.png)
 - freebox-switch-bytes1 (1..4)  
