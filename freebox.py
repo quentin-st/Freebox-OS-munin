@@ -14,19 +14,9 @@ device_name = socket.gethostname()
 
 
 class Freebox:
-    uid = None
-    api_base_url = None
-    device_type = None
     app_token = None
-    ip = None
-
     session_challenge = None
     session_token = None
-
-    def __init(self, uid, api_base_url, device_type):
-        self.uid = uid
-        self.api_base_url = api_base_url
-        self.device_type = device_type
 
     @staticmethod
     def get_api_call_uri(endpoint):
