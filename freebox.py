@@ -22,9 +22,8 @@ class Freebox:
     session_challenge = None
     session_token = None
 
-    @staticmethod
-    def get_api_call_uri(endpoint):
-        return 'http://mafreebox.freebox.fr/api/v3/' + endpoint
+    def get_api_call_uri(self, endpoint):
+        return self.protocol + '://mafreebox.freebox.fr/api/v3/' + endpoint
 
     def save(self):
         with open(freebox_config_file, 'w') as fh:
@@ -37,10 +36,18 @@ class Freebox:
         except FileNotFoundError as ex:
             raise FreeboxNoState() from ex
 
+        if 'root_ca' in self.__dict__:
+            # compute the full filename
+            self.root_ca = os.path.join(os.path.dirname(__file__), self.root_ca)
+        else:
+            # backward compatibility with old config file
+            self.root_ca = ''
+            self.protocol = 'http'
+
     def api_open_session(self):
         # Retrieve challenge
-        uri = Freebox.get_api_call_uri('login/')
-        r = requests.get(uri)
+        uri = self.get_api_call_uri('login/')
+        r = requests.get(uri, verify=self.root_ca)
         r_json = r.json()
 
         if not r_json['success']:
@@ -56,7 +63,7 @@ class Freebox:
         r = requests.post(uri, json={
             'app_id': app_id,
             'password': password
-        })
+        }, verify=self.root_ca)
         r_json = r.json()
 
         if not r_json['success']:
@@ -73,7 +80,7 @@ class Freebox:
         # Build request
         r = requests.get(uri, params=params, headers={
             'X-Fbx-App-Auth': self.session_token
-        })
+        }, verify=self.root_ca)
         r_json = r.json()
 
         if not r_json['success']:
@@ -127,13 +134,39 @@ class Freebox:
 
     def api_authorize(self):
         print('Authorizing...')
-        uri = Freebox.get_api_call_uri('login/authorize/')
-        r = requests.post(uri, json={
-            'app_id': app_id,
-            'app_name': app_name,
-            'app_version': app_version,
-            'device_name': device_name
-        })
+
+        def authorize():
+            return requests.post(uri, json={
+                'app_id': app_id,
+                'app_name': app_name,
+                'app_version': app_version,
+                'device_name': device_name
+            }, verify=root_ca)
+
+        # try to use https
+        self.protocol = 'https'
+
+        # no CA found yet
+        self.root_ca = ''
+
+        # compute URI using https
+        uri = self.get_api_call_uri('login/authorize/')
+        # find the root CA to use
+        for root_ca in ['Freebox ECC Root CA.pem', 'Freebox Root CA.pem']:
+            try:
+                r = authorize()
+                print("Using", root_ca)
+                self.root_ca = root_ca
+                break
+            except requests.exceptions.SSLError:
+                print("KO for", root_ca)
+
+        if self.root_ca is '':
+            print('Warning: using unsecure communication!')
+            self.protocol = 'http'
+            # re-compute URI using http
+            uri = self.get_api_call_uri('login/authorize/')
+            r = authorize()
 
         r_json = r.json()
 
@@ -149,7 +182,7 @@ class Freebox:
 
         challenge = None
         while True:
-            r2 = requests.get(uri + str(track_id))
+            r2 = requests.get(uri + str(track_id), verify=self.root_ca)
             r2_json = r2.json()
             status = r2_json['result']['status']
 
