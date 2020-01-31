@@ -22,8 +22,18 @@ class Freebox:
     session_challenge = None
     session_token = None
 
+    def api_get_info(self):
+        uri = self.protocol + '://mafreebox.freebox.fr/api_version'
+        r = requests.get(uri, verify=self.root_ca)
+        r_json = r.json()
+        return r_json
+
     def get_api_call_uri(self, endpoint):
-        return self.protocol + '://mafreebox.freebox.fr/api/v3/' + endpoint
+        r_json = self.api_get_info()
+        api_base_url = r_json['api_base_url']
+        api_version = r_json['api_version']
+        major_api_version = re.search(r'\d+', api_version).group()
+        return self.protocol + '://mafreebox.freebox.fr' + api_base_url + 'v' + major_api_version + '/' + endpoint
 
     def save(self):
         with open(freebox_config_file, 'w') as fh:
