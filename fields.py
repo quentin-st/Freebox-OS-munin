@@ -1,4 +1,4 @@
-from modes import *
+from munin.modes import *
 
 # mode_traffic
 field_rate_down = 'rate_down'

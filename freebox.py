@@ -4,7 +4,7 @@ import sys
 import requests
 import socket
 
-from util import *
+from munin.util import *
 
 freebox_config_file = os.path.join(os.path.dirname(__file__), 'freebox.json')
 app_id = 'freebox-revolution-munin'  # Script legacy name. Changing this would break authentication
