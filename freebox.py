@@ -6,9 +6,11 @@ import socket
 
 from munin.util import *
 
-freebox_config_file = os.path.join(os.path.dirname(__file__), 'freebox.json')
-app_id = 'freebox-revolution-munin'  # Script legacy name. Changing this would break authentication
 app_name = 'Freebox-OS-munin'
+# debian's systemd limitation : https://github.com/munin-monitoring/munin/issues/1236
+# ProtectSystem=full
+freebox_config_file = '/var/lib/munin-node/plugin-state/nobody/' + app_name + '/freebox.json'
+app_id = 'freebox-revolution-munin'  # Script legacy name. Changing this would break authentication
 app_version = '1.0.0'
 device_name = socket.gethostname()
 
@@ -48,7 +50,7 @@ class Freebox:
 
         if 'root_ca' in self.__dict__:
             # compute the full filename
-            self.root_ca = os.path.join(os.path.dirname(__file__), self.root_ca)
+            self.root_ca = self.root_ca
         else:
             # backward compatibility with old config file
             self.root_ca = ''
