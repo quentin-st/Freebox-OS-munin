@@ -21,7 +21,7 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
 3. Launch authorization script
 
     ```bash
-    ./main.py authorize
+    ./freebox_ authorize
     ```
 
 4. Update permissions on authorization file
@@ -29,6 +29,10 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
     ```bash
     chmod 0660 freebox.json
     sudo chgrp munin freebox.json
+    mkdir /var/lib/munin-node/plugin-state/nobody/Freebox-OS-munin
+    cp freebox.json /var/lib/munin-node/plugin-state/nobody/Freebox-OS-munin/
+    cp Freebox ECC Root CA.pem /var/lib/munin-node/plugin-state/nobody/Freebox-OS-munin/
+    cp Freebox Root CA.pem /var/lib/munin-node/plugin-state/nobody/Freebox-OS-munin/
     ```
 
 5. Install the plugins
@@ -36,8 +40,11 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
     > Tip: you don't have to symlink each mode. Skip some if you don't need all information
 
     ```bash
-    ./create_symlinks.py
-    sudo ln -sf $(pwd)/freebox-* /etc/munin/plugins
+    cp freebox_ /usr/share/munin/plugins/
+    mkdir /usr/local/lib/python3.7/dist-packages/munin/
+    cp *.py /usr/local/lib/python3.7/dist-packages/munin/
+    munin-node-configure --shell | grep -i freebox
+    copy and execute all symlinks generated
     ```
 
 6. Restart munin node service
@@ -48,14 +55,14 @@ This script has been tested upon Python 2.7, 3.2 & 3.5. See [below](#graphs) for
 7. Test it
 
     ```
-    sudo munin-run freebox-traffic
+    sudo munin-run freebox_traffic
     ```
 
 ## Contribute
 Fork this repository, and submit pull requests upon master branch.
 
 > Tip: when making changes that affects all plugins, you can tests them all
-by running `./main.py --mode all`. This will execute each plugin in both config
+by running `./freebox_ --mode all`. This will execute each plugin in both config
 & poll modes.
 
 ## Graphs
