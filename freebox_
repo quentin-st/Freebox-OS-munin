@@ -98,9 +98,10 @@ def print_config():
     elif mode == mode_fan_speed:
         print('graph_title Freebox fan speed')
         print('graph_vlabel rpm')
-        print('fan_speed.label Internal fan speed')
-        print('fan_speed.colour 50A850')
-        print('fan_speed.critical 1:')
+        r_json = freebox.api('system/')
+        for fan in r_json.get('fans'):
+            print('{}.label Internal {}'.format(fan.get('id'), fan.get('id')))
+            print('{}.critical 1:'.format(fan.get('id')))
     elif mode == mode_xdsl:
         print('graph_title xDSL')
         print('graph_vlabel xDSL noise margin (dB)')
@@ -529,7 +530,7 @@ def query_rrd_data():
     sums = {}
     for timed_data in data:
         for key, value in timed_data.items():
-            if key not in rrd_fields:  # Ignore "time" and other unused values
+            if not key.startswith(tuple(rrd_fields)): # Ignore "time" and other unused values
                 continue
 
             if key not in sums.keys():

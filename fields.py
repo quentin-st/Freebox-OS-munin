@@ -13,7 +13,7 @@ field_sw = 'sw'
 field_hdd = 'hdd'
 
 # mode_fan_speed
-field_fan_speed = 'fan_speed'
+field_fan_speed = 'fan'
 
 # mode_xdsl
 field_snr_down = 'snr_down'
