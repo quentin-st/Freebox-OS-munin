@@ -101,7 +101,7 @@ def print_config():
         print('graph_vlabel rpm')
         r_json = freebox.api('system/')
         for fan in r_json.get('fans'):
-            print('{}.label Internal {}'.format(fan.get('id'), fan.get('id')))
+            print('{}.label {}'.format(fan.get('id'), fan.get('name')))
             print('{}.critical 1:'.format(fan.get('id')))
     elif mode == mode_xdsl:
         print('graph_title xDSL')
@@ -121,7 +121,7 @@ def print_config():
                 print('{}.label {}'.format(field_slug, kind.title() + ' ' + xdsl_errors_fields_descriptions.get(field)))
                 print('{}.min 0'.format(field_slug))
                 print('{}.draw LINE'.format(field_slug))
-    elif mode.startswith('freebox_switch-bytes'):
+    elif mode.startswith('switch-bytes'):
         switch_index = mode[-1]
         print('graph_title Switch port #{} traffic'.format(switch_index))
         print('graph_scale yes')
@@ -131,7 +131,7 @@ def print_config():
         print('rx_good_bytes.type COUNTER')
         print('tx_bytes.label tx')
         print('tx_bytes.type COUNTER')
-    elif mode.startswith('freebox_switch-packets'):
+    elif mode.startswith('switch-packets'):
         switch_index = mode[-1]
         print('graph_title Switch port #{} traffic'.format(switch_index))
         print('graph_scale yes')
@@ -149,7 +149,7 @@ def print_config():
         print('rx_broadcast_packets.type COUNTER')
         print('tx_broadcast_packets.label tx broadcast')
         print('tx_broadcast_packets.type COUNTER')
-    elif mode.startswith('freebox_switch-stations'):
+    elif mode.startswith('switch-stations'):
         switch_index = mode[-1]
         print('graph_title Switch port #{} stations'.format(switch_index))
         print('graph_vlabel #')
@@ -159,7 +159,7 @@ def print_config():
         for station in stations:
             print('{}.label {}'.format(station, stations[station]['hostname']))
             print('{}.draw AREASTACK'.format(station))
-    elif mode.startswith('freebox_switch'):
+    elif mode.startswith('switch'):
         switch_index = mode[-1]
         print('graph_title Switch port #{} traffic'.format(switch_index))
         print('graph_vlabel byte in (-) / out (+) per second')
@@ -304,10 +304,10 @@ def query_data():
         query_connection()
     elif mode == mode_ftth:
         query_ftth()
-    elif mode.startswith('freebox_switch-stations'):
+    elif mode.startswith('switch-stations'):
         switch_index = mode[-1]
         query_switch_stations(switch_index)
-    elif mode.startswith('freebox_switch-'):
+    elif mode.startswith('switch-'):
         switch_index = mode[-1]
         mode2 = mode[:-1]
         query_switch(switch_index, mode2)
