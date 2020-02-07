@@ -78,23 +78,24 @@ def print_config():
         print('bw_down.colour 407DB5')
     elif mode == mode_temp:
         print('graph_title Freebox temperature')
-        print('graph_vlabel temperature in C')
-        print('cpum.label CPUM')
-        print('cpum.colour EDC240')
-        print('cpum.warning 80')
-        print('cpum.critical 90')
-        print('cpub.label CPUB')
-        print('cpub.colour AFD8F8')
-        print('cpub.warning 80')
-        print('cpub.critical 90')
-        print('sw.label SW')
-        print('sw.colour CB4B4B')
-        print('sw.warning 60')
-        print('sw.critical 70')
-        print('hdd.label HDD')
-        print('hdd.colour 4DA74D')
-        print('hdd.warning 55')
-        print('hdd.critical 65')
+        print('graph_vlabel temperature in °C')
+        r_json = freebox.api('system/')
+        i = 0
+        for temp in r_json.get('sensors'):
+            print('{}.label {}'.format(temp.get('id'), temp.get('name')))
+            if 'cpu' in temp.get('id'):
+                color = ['EDC240','AFD8F8','CB4B4B']
+                print('{}.colour {}'.format(temp.get('id'), color[i]))
+                print('{}.warning 85'.format(temp.get('id')))
+                print('{}.critical 90'.format(temp.get('id')))
+                i += 1
+            elif 'hdd' in temp.get('id'):
+                print('{}.colour 4DA74D'.format(temp.get('id')))
+                print('{}.warning 55'.format(temp.get('id')))
+                print('{}.critical 65'.format(temp.get('id')))
+            else:
+                print('{}.warning 60'.format(temp.get('id')))
+                print('{}.critical 70'.format(temp.get('id')))
     elif mode == mode_fan_speed:
         print('graph_title Freebox fan speed')
         print('graph_vlabel rpm')

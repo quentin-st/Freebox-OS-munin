@@ -11,6 +11,9 @@ field_cpum = 'cpum'
 field_cpub = 'cpub'
 field_sw = 'sw'
 field_hdd = 'hdd'
+field_temp_hdd = 'temp_hdd'
+field_temp_cpu = 'temp_cpu'
+field_temp_t = 'temp_t'
 
 # mode_fan_speed
 field_fan_speed = 'fan'
@@ -100,7 +103,10 @@ fields = {
         field_cpum,
         field_cpub,
         field_sw,
-        field_hdd
+        field_hdd,
+        field_temp_hdd,
+        field_temp_cpu,
+        field_temp_t
     ],
     mode_fan_speed: [
         field_fan_speed
