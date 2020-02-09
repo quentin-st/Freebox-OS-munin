@@ -9,7 +9,8 @@ from munin.util import *
 app_name = 'Freebox-OS-munin'
 # debian's systemd limitation : https://github.com/munin-monitoring/munin/issues/1236
 # ProtectSystem=full
-freebox_config_file = '/var/lib/munin-node/plugin-state/nobody/' + app_name + '/freebox.json'
+write_dir = '/var/lib/munin-node/plugin-state/nobody/'
+freebox_config_file = write_dir + app_name + '/freebox.json'
 app_id = 'freebox-revolution-munin'  # Script legacy name. Changing this would break authentication
 app_version = '1.0.0'
 device_name = socket.gethostname()

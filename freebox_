@@ -259,17 +259,35 @@ def print_config():
             print('{}.max 1'.format(field))
             print('{}.label {}'.format(field, field))
             print('{}.draw AREASTACK'.format(field))
-    elif mode == mode_wifi_stations:
-        print('graph_title Wifi stations')
+    elif mode.startswith('wifi-stations'):
+        wifi_index = mode[-1]
+        result = get_wifi_ap()
+        wifi_name = result.get(int(wifi_index))
+        print('graph_title Wifi {} stations'.format(wifi_name))
         print('graph_vlabel #')
         print('graph_total Total')
         print('graph_args --lower-limit 0')
-        stations = get_wifi_stations()
+        stations = get_wifi_stations(wifi_index)
         for station in stations:
             print('{}.label {}'.format(station, station))
             print('{}.draw AREASTACK'.format(station))
-    elif mode == mode_wifi_bytes:
-        print('graph_title Wifi bytes up/down')
+    elif mode.startswith('wifi-bytes-log'):
+        wifi_index = mode[-1]
+        result = get_wifi_ap()
+        wifi_name = result.get(int(wifi_index))
+        print('graph_title Wifi {} bytes up/down'.format(wifi_name))
+        print('graph_scale yes')
+        print('graph_vlabel bytes per second')
+        print('graph_args --logarithmic')
+        print('rx_bytes.type COUNTER')
+        print('rx_bytes.label down (bytes/s)')
+        print('tx_bytes.type COUNTER')
+        print('tx_bytes.label up (bytes/s)')
+    elif mode.startswith('wifi-bytes'):
+        wifi_index = mode[-1]
+        result = get_wifi_ap()
+        wifi_name = result.get(int(wifi_index))
+        print('graph_title Wifi {} bytes up/down'.format(wifi_name))
         print('graph_scale yes')
         print('graph_vlabel byte in (-) / out (+) per second')
         print('rx_bytes.type COUNTER')
@@ -278,15 +296,6 @@ def print_config():
         print('tx_bytes.label bytes/s')
         print('tx_bytes.type COUNTER')
         print('tx_bytes.negative rx_bytes')
-    elif mode == mode_wifi_bytes_log:
-        print('graph_title Wifi bytes up/down')
-        print('graph_scale yes')
-        print('graph_vlabel bytes per second')
-        print('graph_args --logarithmic')
-        print('rx_bytes.type COUNTER')
-        print('rx_bytes.label down (bytes/s)')
-        print('tx_bytes.type COUNTER')
-        print('tx_bytes.label up (bytes/s)')
 
 
 def query_data():
@@ -311,10 +320,12 @@ def query_data():
         switch_index = mode[-1]
         mode2 = mode[:-1]
         query_switch(switch_index, mode2)
-    elif mode == mode_wifi_stations:
-        query_wifi_stations()
-    elif mode in [mode_wifi_bytes, mode_wifi_bytes_log]:
-        query_wifi_bytes()
+    elif mode.startswith('wifi-stations'):
+        wifi_index = mode[-1]
+        query_wifi_stations(wifi_index)
+    elif mode.startswith('wifi-byte'):
+        wifi_index = mode[-1]
+        query_wifi_bytes(wifi_index)
     else:
         query_rrd_data()
 
@@ -375,12 +386,26 @@ def query_ftth():
         print('{}.value {}'.format(field, value))
 
 
-def get_wifi_stations():
-    data = freebox.api('wifi/ap/0/stations/')
+def get_wifi_ap():
+    result = dict()
+    r_json = freebox.api('wifi/ap/')
+    for wifi in r_json:
+        result[wifi['id']] = wifi['name']
+        #for key, value in wifi.items():
+        #    if key.startswith('id'):
+        #        name += str(value)
+        #    if key.startswith('name'):
+        #        name += value + '<->'
+        #name += '\n'
+    return(result)
+    #print (name)
+
+def get_wifi_stations(idx_station):
+    data = freebox.api('wifi/ap/' + idx_station + '/stations/')
 
     # the filename is something like
     # /var/lib/munin-node/plugin-state/nobody/freebox-wifi-stations-
-    wifi_filename = os.environ.get('MUNIN_STATEFILE', mode + '-STATEFILE')
+    wifi_filename = os.environ.get('MUNIN_STATEFILE', mode + idx_station + '-STATEFILE')
     try:
         with open(wifi_filename) as f:
             stations = json.load(f)
@@ -407,8 +432,8 @@ def get_wifi_stations():
 
     return stations
 
-def query_wifi_stations():
-    stations = get_wifi_stations()
+def query_wifi_stations(idx_wifi):
+    stations = get_wifi_stations(idx_wifi)
 
     current_time = time.time()
     for station in stations:
@@ -419,16 +444,18 @@ def query_wifi_stations():
             value = 0
         print('{}.value {}'.format(station, value))
 
-def query_wifi_bytes():
-    data = freebox.api('wifi/ap/0/stations/')
+def query_wifi_bytes(idx_wifi):
+    data = freebox.api('wifi/ap/' + idx_wifi + '/stations/')
 
     fields = dict()
-    for field in get_fields(mode):
+    mode_wifi = mode[:-1]
+
+    for field in get_fields(mode_wifi):
         fields[field] = 0
     for station in data:
-        for field in get_fields(mode):
+        for field in get_fields(mode_wifi):
             fields[field] += station[field]
-    for field in get_fields(mode):
+    for field in get_fields(mode_wifi):
         print('{}.value {}'.format(field, fields[field]))
 
 
@@ -588,7 +615,13 @@ if len(sys.argv) > 1:
         print('yes')
         sys.exit(0)
     elif args.arg == "suggest":
-        print('{}'.format('\n'.join(modes)))
+        result = get_wifi_ap()
+        for mode in modes:
+            if 'wifi' in mode:
+                for wifi in result:
+                    print('{}{}'.format(mode, wifi))
+            else:
+                print('{}'.format(mode))
         sys.exit(0)
 
 # Great for testing
@@ -598,13 +631,25 @@ if mode == 'all':
             'red': '\033[31m',
             'normal': '\033[0m',
              }
+    result = get_wifi_ap()
     for m in modes:
         mode = m
-        print(COLORS['red'] + "Testing mode:", mode)
-        print(COLORS['blue'] + "config:" + COLORS['normal'])
-        print_config()
-        print(COLORS['blue'] + "data:" + COLORS['normal'])
-        query_data()
+        if mode.startswith('wifi'):
+            for wifi in result:
+                temp = mode
+                mode += str(wifi)
+                print(COLORS['red'] + "Testing mode:", mode)
+                print(COLORS['blue'] + "config:" + COLORS['normal'])
+                print_config()
+                print(COLORS['blue'] + "data:" + COLORS['normal'])
+                query_data()
+                mode = temp
+        else:
+            print(COLORS['red'] + "Testing mode:", mode)
+            print(COLORS['blue'] + "config:" + COLORS['normal'])
+            print_config()
+            print(COLORS['blue'] + "data:" + COLORS['normal'])
+            query_data()
 
     sys.exit(0)
 
