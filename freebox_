@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
+#
+# Parameters can be specified:
+#   [freebox_switch*]
+#   env.category switch
+#
+#
 # Magic markers
 #  #%# capabilities=autoconf suggest
 #  #%# family=auto
@@ -59,9 +65,11 @@ args = parser.parse_args()
 
 
 def print_config():
-    print('graph_category {}'.format(MUNIN_CATEGORY))
+
+# You can set the env-var "category" to override the default category.
 
     if mode == mode_traffic:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Freebox traffic')
         print('graph_vlabel byte in (-) / out (+) per second')
         print('rate_up.label Up traffic (byte/s)')
@@ -77,6 +85,7 @@ def print_config():
         print('bw_down.draw LINE')
         print('bw_down.colour 407DB5')
     elif mode == mode_temp:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Freebox temperature')
         print('graph_vlabel temperature in °C')
         r_json = freebox.api('system/')
@@ -97,6 +106,7 @@ def print_config():
                 print('{}.warning 60'.format(temp.get('id')))
                 print('{}.critical 70'.format(temp.get('id')))
     elif mode == mode_fan_speed:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Freebox fan speed')
         print('graph_vlabel rpm')
         r_json = freebox.api('system/')
@@ -104,6 +114,7 @@ def print_config():
             print('{}.label {}'.format(fan.get('id'), fan.get('name')))
             print('{}.critical 1:'.format(fan.get('id')))
     elif mode == mode_xdsl:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title xDSL')
         print('graph_vlabel xDSL noise margin (dB)')
         print('snr_up.label Up')
@@ -111,6 +122,7 @@ def print_config():
         print('snr_down.label Down')
         print('snr_down.colour 4DA74D')
     elif mode == mode_xdsl_errors:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title xDSL errors')
         print('graph_vlabel xDSL errors since last restart')
         print('graph_args --lower-limit 0')
@@ -123,6 +135,7 @@ def print_config():
                 print('{}.draw LINE'.format(field_slug))
     elif mode.startswith('switch-bytes'):
         switch_index = mode[-1]
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Switch port #{} traffic'.format(switch_index))
         print('graph_scale yes')
         print('graph_vlabel bytes per second')
@@ -133,6 +146,7 @@ def print_config():
         print('tx_bytes.type COUNTER')
     elif mode.startswith('switch-packets'):
         switch_index = mode[-1]
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Switch port #{} traffic'.format(switch_index))
         print('graph_scale yes')
         print('graph_vlabel packets per second')
@@ -151,6 +165,7 @@ def print_config():
         print('tx_broadcast_packets.type COUNTER')
     elif mode.startswith('switch-stations'):
         switch_index = mode[-1]
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Switch port #{} stations'.format(switch_index))
         print('graph_vlabel #')
         print('graph_total Total')
@@ -161,6 +176,7 @@ def print_config():
             print('{}.draw AREASTACK'.format(station.replace(' ', '_')))
     elif mode.startswith('switch'):
         switch_index = mode[-1]
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Switch port #{} traffic'.format(switch_index))
         print('graph_vlabel byte in (-) / out (+) per second')
         print('rx_{}.label Up (byte/s)'.format(switch_index))
@@ -170,6 +186,7 @@ def print_config():
         print('tx_{}.draw AREA'.format(switch_index))
         print('tx_{}.colour 8BC34A'.format(switch_index))
     elif mode == mode_df:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Disk usage in percent')
         print('graph_args --lower-limit 0 --upper-limit 100')
         print('graph_vlabel %')
@@ -189,6 +206,7 @@ def print_config():
                 print('{}.label {}'.format(slug, name))
                 print('{}.draw LINE'.format(slug))
     elif mode == mode_hddspin:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Spinning status for Freebox disks')
         print('graph_args --lower-limit 0 --upper-limit 1')
         print('graph_vlabel Disk state (active/sleep)')
@@ -208,6 +226,7 @@ def print_config():
             print('{}_down.draw AREASTACK'.format(slug))
             print('{}_down.colour ffffff'.format(slug))
     elif mode == mode_transmission_tasks:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Transmission tasks stats')
         print('graph_args --lower-limit 0')
         print('graph_vlabel #')
@@ -217,6 +236,7 @@ def print_config():
             print('{}.label Number of {} tasks'.format(field, field.split('_')[-1]))
             print('{}.draw AREASTACK'.format(field))
     elif mode == mode_transmission_traffic:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Transmission traffic')
         print('graph_vlabel byte in (-) / out (+) per second')
         print('tx_rate.label Up (byte/s)')
@@ -232,6 +252,7 @@ def print_config():
         print('rx_throttling.draw LINE')
         print('rx_throttling.colour 407DB5')
     elif mode == mode_connection:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_scale yes')
         print('graph_title bytes up/down')
         print('graph_vlabel bytes in (-) / out (+) per second')
@@ -242,6 +263,7 @@ def print_config():
         print('bytes_up.type COUNTER')
         print('bytes_up.negative bytes_down')
     elif mode == mode_connection_log:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_scale yes')
         print('graph_title bytes up/down')
         print('graph_vlabel bytes per second')
@@ -251,6 +273,7 @@ def print_config():
         print('bytes_up.type COUNTER')
         print('bytes_up.label up (bytes/s)')
     elif mode == mode_ftth:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title FTTH status')
         print('graph_args --lower-limit 0 --upper-limit 1')
         print('graph_vlabel Status')
@@ -263,6 +286,7 @@ def print_config():
         wifi_index = mode[-1]
         result = get_wifi_ap()
         wifi_name = result.get(int(wifi_index))
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Wifi {} stations'.format(wifi_name))
         print('graph_vlabel #')
         print('graph_total Total')
@@ -275,6 +299,7 @@ def print_config():
         wifi_index = mode[-1]
         result = get_wifi_ap()
         wifi_name = result.get(int(wifi_index))
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Wifi {} bytes up/down'.format(wifi_name))
         print('graph_scale yes')
         print('graph_vlabel bytes per second')
@@ -287,6 +312,7 @@ def print_config():
         wifi_index = mode[-1]
         result = get_wifi_ap()
         wifi_name = result.get(int(wifi_index))
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Wifi {} bytes up/down'.format(wifi_name))
         print('graph_scale yes')
         print('graph_vlabel byte in (-) / out (+) per second')
