@@ -1,4 +1,4 @@
-from fields import *
+from munin.fields import *
 
 db_net = 'net'
 db_temp = 'temp'

@@ -1,5 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+#
+#
+# Parameters can be specified:
+#   [freebox_switch*]
+#   env.category switch
+#
+#
+# Magic markers
+#  #%# capabilities=autoconf suggest
+#  #%# family=auto
 
 """ This script provides munin scripts for Freebox OS stats.
  Freebox Revolution & Freebox 4K are supported for the following stats:
@@ -25,11 +35,11 @@ import datetime
 import time
 import math
 
-from db import *
-from fields import *
-from freebox import app_version, Freebox, FreeboxNoState
-from modes import *
-from util import *
+from munin.db import *
+from munin.fields import *
+from munin.freebox import app_version, Freebox, FreeboxNoState
+from munin.modes import *
+from munin.util import *
 
 ###############
 # Configuration
@@ -50,14 +60,16 @@ __status__ = 'Production'
 
 parser = argparse.ArgumentParser()
 parser.add_argument('arg', nargs='?')
-parser.add_argument('--mode', default=__file__.split('/')[-1])  # Mode, determined by symlink name
+parser.add_argument('--mode', default=__file__.split('_')[-1])  # Mode, determined by symlink name
 args = parser.parse_args()
 
 
 def print_config():
-    print('graph_category {}'.format(MUNIN_CATEGORY))
+
+# You can set the env-var "category" to override the default category.
 
     if mode == mode_traffic:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Freebox traffic')
         print('graph_vlabel byte in (-) / out (+) per second')
         print('rate_up.label Up traffic (byte/s)')
@@ -73,31 +85,36 @@ def print_config():
         print('bw_down.draw LINE')
         print('bw_down.colour 407DB5')
     elif mode == mode_temp:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Freebox temperature')
-        print('graph_vlabel temperature in C')
-        print('cpum.label CPUM')
-        print('cpum.colour EDC240')
-        print('cpum.warning 80')
-        print('cpum.critical 90')
-        print('cpub.label CPUB')
-        print('cpub.colour AFD8F8')
-        print('cpub.warning 80')
-        print('cpub.critical 90')
-        print('sw.label SW')
-        print('sw.colour CB4B4B')
-        print('sw.warning 60')
-        print('sw.critical 70')
-        print('hdd.label HDD')
-        print('hdd.colour 4DA74D')
-        print('hdd.warning 55')
-        print('hdd.critical 65')
+        print('graph_vlabel temperature in °C')
+        r_json = freebox.api('system/')
+        i = 0
+        for temp in r_json.get('sensors'):
+            print('{}.label {}'.format(temp.get('id'), temp.get('name')))
+            if 'cpu' in temp.get('id'):
+                color = ['EDC240','AFD8F8','CB4B4B']
+                print('{}.colour {}'.format(temp.get('id'), color[i]))
+                print('{}.warning 85'.format(temp.get('id')))
+                print('{}.critical 90'.format(temp.get('id')))
+                i += 1
+            elif 'hdd' in temp.get('id'):
+                print('{}.colour 4DA74D'.format(temp.get('id')))
+                print('{}.warning 55'.format(temp.get('id')))
+                print('{}.critical 65'.format(temp.get('id')))
+            else:
+                print('{}.warning 60'.format(temp.get('id')))
+                print('{}.critical 70'.format(temp.get('id')))
     elif mode == mode_fan_speed:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Freebox fan speed')
         print('graph_vlabel rpm')
-        print('fan_speed.label Internal fan speed')
-        print('fan_speed.colour 50A850')
-        print('fan_speed.critical 1:')
+        r_json = freebox.api('system/')
+        for fan in r_json.get('fans'):
+            print('{}.label {}'.format(fan.get('id'), fan.get('name')))
+            print('{}.critical 1:'.format(fan.get('id')))
     elif mode == mode_xdsl:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title xDSL')
         print('graph_vlabel xDSL noise margin (dB)')
         print('snr_up.label Up')
@@ -105,6 +122,7 @@ def print_config():
         print('snr_down.label Down')
         print('snr_down.colour 4DA74D')
     elif mode == mode_xdsl_errors:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title xDSL errors')
         print('graph_vlabel xDSL errors since last restart')
         print('graph_args --lower-limit 0')
@@ -115,8 +133,9 @@ def print_config():
                 print('{}.label {}'.format(field_slug, kind.title() + ' ' + xdsl_errors_fields_descriptions.get(field)))
                 print('{}.min 0'.format(field_slug))
                 print('{}.draw LINE'.format(field_slug))
-    elif mode.startswith('freebox-switch-bytes'):
+    elif mode.startswith('switch-bytes'):
         switch_index = mode[-1]
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Switch port #{} traffic'.format(switch_index))
         print('graph_scale yes')
         print('graph_vlabel bytes per second')
@@ -125,8 +144,9 @@ def print_config():
         print('rx_good_bytes.type COUNTER')
         print('tx_bytes.label tx')
         print('tx_bytes.type COUNTER')
-    elif mode.startswith('freebox-switch-packets'):
+    elif mode.startswith('switch-packets'):
         switch_index = mode[-1]
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Switch port #{} traffic'.format(switch_index))
         print('graph_scale yes')
         print('graph_vlabel packets per second')
@@ -143,18 +163,20 @@ def print_config():
         print('rx_broadcast_packets.type COUNTER')
         print('tx_broadcast_packets.label tx broadcast')
         print('tx_broadcast_packets.type COUNTER')
-    elif mode.startswith('freebox-switch-stations'):
+    elif mode.startswith('switch-stations'):
         switch_index = mode[-1]
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Switch port #{} stations'.format(switch_index))
         print('graph_vlabel #')
         print('graph_total Total')
         print('graph_args --lower-limit 0')
         stations = get_switch_stations(switch_index)
         for station in stations:
-            print('{}.label {}'.format(station, stations[station]['hostname']))
-            print('{}.draw AREASTACK'.format(station))
-    elif mode.startswith('freebox-switch'):
+            print('{}.label {}'.format(station.replace(' ', '_'), stations[station]['hostname']))
+            print('{}.draw AREASTACK'.format(station.replace(' ', '_')))
+    elif mode.startswith('switch'):
         switch_index = mode[-1]
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Switch port #{} traffic'.format(switch_index))
         print('graph_vlabel byte in (-) / out (+) per second')
         print('rx_{}.label Up (byte/s)'.format(switch_index))
@@ -164,6 +186,7 @@ def print_config():
         print('tx_{}.draw AREA'.format(switch_index))
         print('tx_{}.colour 8BC34A'.format(switch_index))
     elif mode == mode_df:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Disk usage in percent')
         print('graph_args --lower-limit 0 --upper-limit 100')
         print('graph_vlabel %')
@@ -183,6 +206,7 @@ def print_config():
                 print('{}.label {}'.format(slug, name))
                 print('{}.draw LINE'.format(slug))
     elif mode == mode_hddspin:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Spinning status for Freebox disks')
         print('graph_args --lower-limit 0 --upper-limit 1')
         print('graph_vlabel Disk state (active/sleep)')
@@ -202,6 +226,7 @@ def print_config():
             print('{}_down.draw AREASTACK'.format(slug))
             print('{}_down.colour ffffff'.format(slug))
     elif mode == mode_transmission_tasks:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Transmission tasks stats')
         print('graph_args --lower-limit 0')
         print('graph_vlabel #')
@@ -211,6 +236,7 @@ def print_config():
             print('{}.label Number of {} tasks'.format(field, field.split('_')[-1]))
             print('{}.draw AREASTACK'.format(field))
     elif mode == mode_transmission_traffic:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title Transmission traffic')
         print('graph_vlabel byte in (-) / out (+) per second')
         print('tx_rate.label Up (byte/s)')
@@ -226,6 +252,7 @@ def print_config():
         print('rx_throttling.draw LINE')
         print('rx_throttling.colour 407DB5')
     elif mode == mode_connection:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_scale yes')
         print('graph_title bytes up/down')
         print('graph_vlabel bytes in (-) / out (+) per second')
@@ -236,6 +263,7 @@ def print_config():
         print('bytes_up.type COUNTER')
         print('bytes_up.negative bytes_down')
     elif mode == mode_connection_log:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_scale yes')
         print('graph_title bytes up/down')
         print('graph_vlabel bytes per second')
@@ -245,6 +273,7 @@ def print_config():
         print('bytes_up.type COUNTER')
         print('bytes_up.label up (bytes/s)')
     elif mode == mode_ftth:
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
         print('graph_title FTTH status')
         print('graph_args --lower-limit 0 --upper-limit 1')
         print('graph_vlabel Status')
@@ -253,17 +282,38 @@ def print_config():
             print('{}.max 1'.format(field))
             print('{}.label {}'.format(field, field))
             print('{}.draw AREASTACK'.format(field))
-    elif mode == mode_wifi_stations:
-        print('graph_title Wifi stations')
+    elif mode.startswith('wifi-stations'):
+        wifi_index = mode[-1]
+        result = get_wifi_ap()
+        wifi_name = result.get(int(wifi_index))
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
+        print('graph_title Wifi {} stations'.format(wifi_name))
         print('graph_vlabel #')
         print('graph_total Total')
         print('graph_args --lower-limit 0')
-        stations = get_wifi_stations()
+        stations = get_wifi_stations(wifi_index)
         for station in stations:
             print('{}.label {}'.format(station, station))
             print('{}.draw AREASTACK'.format(station))
-    elif mode == mode_wifi_bytes:
-        print('graph_title Wifi bytes up/down')
+    elif mode.startswith('wifi-bytes-log'):
+        wifi_index = mode[-1]
+        result = get_wifi_ap()
+        wifi_name = result.get(int(wifi_index))
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
+        print('graph_title Wifi {} bytes up/down'.format(wifi_name))
+        print('graph_scale yes')
+        print('graph_vlabel bytes per second')
+        print('graph_args --logarithmic')
+        print('rx_bytes.type COUNTER')
+        print('rx_bytes.label down (bytes/s)')
+        print('tx_bytes.type COUNTER')
+        print('tx_bytes.label up (bytes/s)')
+    elif mode.startswith('wifi-bytes'):
+        wifi_index = mode[-1]
+        result = get_wifi_ap()
+        wifi_name = result.get(int(wifi_index))
+        print('graph_category {}'.format(os.environ.get('category') if os.environ.get('category') else MUNIN_CATEGORY))
+        print('graph_title Wifi {} bytes up/down'.format(wifi_name))
         print('graph_scale yes')
         print('graph_vlabel byte in (-) / out (+) per second')
         print('rx_bytes.type COUNTER')
@@ -272,15 +322,6 @@ def print_config():
         print('tx_bytes.label bytes/s')
         print('tx_bytes.type COUNTER')
         print('tx_bytes.negative rx_bytes')
-    elif mode == mode_wifi_bytes_log:
-        print('graph_title Wifi bytes up/down')
-        print('graph_scale yes')
-        print('graph_vlabel bytes per second')
-        print('graph_args --logarithmic')
-        print('rx_bytes.type COUNTER')
-        print('rx_bytes.label down (bytes/s)')
-        print('tx_bytes.type COUNTER')
-        print('tx_bytes.label up (bytes/s)')
 
 
 def query_data():
@@ -298,17 +339,19 @@ def query_data():
         query_connection()
     elif mode == mode_ftth:
         query_ftth()
-    elif mode.startswith('freebox-switch-stations'):
+    elif mode.startswith('switch-stations'):
         switch_index = mode[-1]
         query_switch_stations(switch_index)
-    elif mode.startswith('freebox-switch-'):
+    elif mode.startswith('switch-'):
         switch_index = mode[-1]
         mode2 = mode[:-1]
         query_switch(switch_index, mode2)
-    elif mode == mode_wifi_stations:
-        query_wifi_stations()
-    elif mode in [mode_wifi_bytes, mode_wifi_bytes_log]:
-        query_wifi_bytes()
+    elif mode.startswith('wifi-stations'):
+        wifi_index = mode[-1]
+        query_wifi_stations(wifi_index)
+    elif mode.startswith('wifi-byte'):
+        wifi_index = mode[-1]
+        query_wifi_bytes(wifi_index)
     else:
         query_rrd_data()
 
@@ -369,12 +412,26 @@ def query_ftth():
         print('{}.value {}'.format(field, value))
 
 
-def get_wifi_stations():
-    data = freebox.api('wifi/ap/0/stations/')
+def get_wifi_ap():
+    result = dict()
+    r_json = freebox.api('wifi/ap/')
+    for wifi in r_json:
+        result[wifi['id']] = wifi['name']
+        #for key, value in wifi.items():
+        #    if key.startswith('id'):
+        #        name += str(value)
+        #    if key.startswith('name'):
+        #        name += value + '<->'
+        #name += '\n'
+    return(result)
+    #print (name)
+
+def get_wifi_stations(idx_station):
+    data = freebox.api('wifi/ap/' + idx_station + '/stations/')
 
     # the filename is something like
     # /var/lib/munin-node/plugin-state/nobody/freebox-wifi-stations-
-    wifi_filename = os.environ.get('MUNIN_STATEFILE', mode + '-STATEFILE')
+    wifi_filename = os.environ.get('MUNIN_STATEFILE', mode + idx_station + '-STATEFILE')
     try:
         with open(wifi_filename) as f:
             stations = json.load(f)
@@ -401,8 +458,8 @@ def get_wifi_stations():
 
     return stations
 
-def query_wifi_stations():
-    stations = get_wifi_stations()
+def query_wifi_stations(idx_wifi):
+    stations = get_wifi_stations(idx_wifi)
 
     current_time = time.time()
     for station in stations:
@@ -413,16 +470,18 @@ def query_wifi_stations():
             value = 0
         print('{}.value {}'.format(station, value))
 
-def query_wifi_bytes():
-    data = freebox.api('wifi/ap/0/stations/')
+def query_wifi_bytes(idx_wifi):
+    data = freebox.api('wifi/ap/' + idx_wifi + '/stations/')
 
     fields = dict()
-    for field in get_fields(mode):
+    mode_wifi = mode[:-1]
+
+    for field in get_fields(mode_wifi):
         fields[field] = 0
     for station in data:
-        for field in get_fields(mode):
+        for field in get_fields(mode_wifi):
             fields[field] += station[field]
-    for field in get_fields(mode):
+    for field in get_fields(mode_wifi):
         print('{}.value {}'.format(field, fields[field]))
 
 
@@ -498,7 +557,7 @@ def query_switch_stations(interface):
             value = 1
         else:
             value = 0
-        print('{}.value {}'.format(station, value))
+        print('{}.value {}'.format(station.replace(' ', '_'), value))
 
 
 def query_rrd_data():
@@ -525,7 +584,7 @@ def query_rrd_data():
     sums = {}
     for timed_data in data:
         for key, value in timed_data.items():
-            if key not in rrd_fields:  # Ignore "time" and other unused values
+            if not key.startswith(tuple(rrd_fields)): # Ignore "time" and other unused values
                 continue
 
             if key not in sums.keys():
@@ -568,20 +627,28 @@ if args.arg == 'authorize':
 # Mode, determined by symlink name
 mode = args.mode
 
-if mode not in modes and mode != 'all':
-    print('Unknown mode {}'.format(mode))
-    print('Accepted modes are {}'.format(', '.join(modes)))
-    sys.exit(1)
-
 try:
     freebox.retrieve()
 except FreeboxNoState:
     print('Could not load Freebox from saved state.')
     sys.exit(1)
 
-if args.arg == 'config':
-    print_config()
-    sys.exit(0)
+if len(sys.argv) > 1:
+    if args.arg == 'config' and mode:
+        print_config()
+        sys.exit(0)
+    elif args.arg == "autoconf":
+        print('yes')
+        sys.exit(0)
+    elif args.arg == "suggest":
+        result = get_wifi_ap()
+        for mode in modes:
+            if 'wifi' in mode:
+                for wifi in result:
+                    print('{}{}'.format(mode, wifi))
+            else:
+                print('{}'.format(mode))
+        sys.exit(0)
 
 # Great for testing
 if mode == 'all':
@@ -590,15 +657,28 @@ if mode == 'all':
             'red': '\033[31m',
             'normal': '\033[0m',
              }
+    result = get_wifi_ap()
     for m in modes:
         mode = m
-        print(COLORS['red'] + "Testing mode:", mode)
-        print(COLORS['blue'] + "config:" + COLORS['normal'])
-        print_config()
-        print(COLORS['blue'] + "data:" + COLORS['normal'])
-        query_data()
+        if mode.startswith('wifi'):
+            for wifi in result:
+                temp = mode
+                mode += str(wifi)
+                print(COLORS['red'] + "Testing mode:", mode)
+                print(COLORS['blue'] + "config:" + COLORS['normal'])
+                print_config()
+                print(COLORS['blue'] + "data:" + COLORS['normal'])
+                query_data()
+                mode = temp
+        else:
+            print(COLORS['red'] + "Testing mode:", mode)
+            print(COLORS['blue'] + "config:" + COLORS['normal'])
+            print_config()
+            print(COLORS['blue'] + "data:" + COLORS['normal'])
+            query_data()
 
     sys.exit(0)
 
-# Query data
-query_data()
+if mode:
+    # Query data
+    query_data()
