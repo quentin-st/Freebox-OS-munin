@@ -151,8 +151,9 @@ def print_config():
         print('graph_args --lower-limit 0')
         stations = get_switch_stations(switch_index)
         for station in stations:
-            print('{}.label {}'.format(station, stations[station]['hostname']))
-            print('{}.draw AREASTACK'.format(station))
+            station_safe = station.replace(" ", "_")
+            print('{}.label {}'.format(station, stations[station_safe]['hostname']))
+            print('{}.draw AREASTACK'.format(station_safe))
     elif mode.startswith('freebox-switch'):
         switch_index = mode[-1]
         print('graph_title Switch port #{} traffic'.format(switch_index))
@@ -260,8 +261,9 @@ def print_config():
         print('graph_args --lower-limit 0')
         stations = get_wifi_stations()
         for station in stations:
-            print('{}.label {}'.format(station, station))
-            print('{}.draw AREASTACK'.format(station))
+            station_safe = station.replace(" ", "_")
+            print('{}.label {}'.format(station_safe, station))
+            print('{}.draw AREASTACK'.format(station_safe))
     elif mode == mode_wifi_bytes:
         print('graph_title Wifi bytes up/down')
         print('graph_scale yes')
@@ -411,7 +413,8 @@ def query_wifi_stations():
             value = 1
         else:
             value = 0
-        print('{}.value {}'.format(station, value))
+        station_safe = station.replace(" ", "_")
+        print('{}.value {}'.format(station_safe, value))
 
 def query_wifi_bytes():
     data = freebox.api('wifi/ap/0/stations/')
@@ -498,7 +501,8 @@ def query_switch_stations(interface):
             value = 1
         else:
             value = 0
-        print('{}.value {}'.format(station, value))
+        station_safe = station.replace(" ", "_")
+        print('{}.value {}'.format(station_safe, value))
 
 
 def query_rrd_data():
