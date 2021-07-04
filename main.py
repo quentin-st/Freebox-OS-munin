@@ -151,9 +151,8 @@ def print_config():
         print('graph_args --lower-limit 0')
         stations = get_switch_stations(switch_index)
         for station in stations:
-            station_safe = station.replace(" ", "_")
-            print('{}.label {}'.format(station, stations[station_safe]['hostname']))
-            print('{}.draw AREASTACK'.format(station_safe))
+            print('{}.label {}'.format(station, stations[station]['hostname']))
+            print('{}.draw AREASTACK'.format(station))
     elif mode.startswith('freebox-switch'):
         switch_index = mode[-1]
         print('graph_title Switch port #{} traffic'.format(switch_index))
