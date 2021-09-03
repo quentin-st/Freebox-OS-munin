@@ -161,7 +161,7 @@ class Freebox:
             except requests.exceptions.SSLError:
                 print("KO for", root_ca)
 
-        if self.root_ca is '':
+        if self.root_ca == '':
             print('Warning: using unsecure communication!')
             self.protocol = 'http'
             # re-compute URI using http
